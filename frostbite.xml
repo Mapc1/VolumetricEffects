@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Frostbite Volumetric Effects" width="1280" height="720">
+    <assets>
+        <scenes>
+            <scene name="Sponza">
+                <file name="models\sponza\sponza.obj"/>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="MainViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+            </viewport>
+        </viewports>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="2000.0"/>
+                <POSITION x="0.0" y="900.0" z="0.0"/>
+                <VIEW x="100.0" y="10.0" z="100.0"/>
+                <UP x="0.0" y="1.0" z="0.0"/>
+            </camera>
+        </cameras>
+
+        <lights>
+            <light name="Sun">
+                <DIRECTION x="0.2" y="-0.7" z="-0.30"/>
+                <COLOR r="0.9" g="0.9" b="0.9"/>
+            </light>
+        </lights>
+
+        <materialLibs>
+            <materialLib filename="frostbite.mtl"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="volfx" defaultCamera="MainCamera">
+            <pass class="depthmap" name="genShadowMap">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+                <renderTarget name="shadowMap" fromLibrary="Frostbite"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Frostbite" toMaterial="shadowMap"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="Render">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="render" fromLibrary="Frostbite" />
+                        <textures>
+                            <texture name="shadowMap" fromLibrary="Frostbite" toUnit="1">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="NEAREST"/>
+                                <MAG_FILTER value="NEAREST"/>
+                            </texture>
+                        </textures>
+                    </map>
+                </injectionMaps>
+            </pass>
+        </pipeline>
+    </pipelines>
+</project>

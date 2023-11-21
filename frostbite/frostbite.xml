@@ -3,7 +3,7 @@
     <assets>
         <scenes>
             <scene name="Sponza">
-                <file name="models\sponza\sponza.obj"/>
+                <file name="..\models\sponza\sponza.obj"/>
             </scene>
         </scenes>
 

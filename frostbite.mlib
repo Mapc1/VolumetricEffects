@@ -21,6 +21,13 @@
 			<DEPTH value="64"/>
 			<INTERNAL_FORMAT value="RGBA"/>
 		</texture>
+
+		<texture name="scatteringTex">
+			<WIDTH value="480"/>
+			<HEIGHT value="270"/>
+			<DEPTH value="64"/>
+			<INTERNAL_FORMAT value="RGBA"/>
+		</texture>
 	</textures>
 
     <shaders>
@@ -31,6 +38,12 @@
 		<shader name="voxelizeMedia">
 			<cs>
 				<file name="shaders/compute/voxelizeMedia.comp"/>
+				<file name="shaders/utils/common.glsl"/>
+			</cs>
+		</shader>
+		<shader name="calcScattering">
+			<cs>
+				<file name="shaders/compute/calcScattering.comp"/>
 				<file name="shaders/utils/common.glsl"/>
 			</cs>
 		</shader>
@@ -118,6 +131,83 @@
 					<LEVEL value="0"/>
 				</imageTexture>
 				<imageTexture UNIT="1" texture="scatExtinctionTex">
+					<ACCESS value="WRITE_ONLY"/>
+					<LEVEL value="0"/>
+				</imageTexture>
+			</imageTextures>
+		</material>
+
+		<material name="calcScattering">
+			<shader name="calcScattering">
+				<values>
+					<valueof uniform   = "EMISS_PHASE_UNIT"
+						     type      = "TEXTURE_BINDING"
+						     context   = "CURRENT"
+						     id        = "0"
+						     component = "UNIT"
+				    />
+					<valueof uniform   = "SCAT_EXTINCTION_UNIT"
+							 type      = "TEXTURE_BINDING"
+							 context   = "CURRENT"
+							 id        = "1"
+							 component = "UNIT"
+				    />
+					<valueof uniform   = "SHADOW_MAP"
+							 type      = "TEXTURE_BINDING"
+							 context   = "CURRENT"
+							 id        = "2"
+							 component = "UNIT"
+				    />
+					<valueof uniform   = "SCATTERING_UNIT"
+							 type      = "IMAGE_TEXTURE"
+							 context   = "CURRENT"
+							 id        = "3"
+							 component = "UNIT"
+				    />
+					<valueof uniform   = "INV_VIEW_MAT"
+							 type      = "CAMERA"
+							 context   = "MainCamera"
+							 component = "VIEW_INVERSE_MATRIX"
+                    />
+					<valueof uniform   = "INV_PROJ_MAT"
+							 type      = "CAMERA"
+							 context   = "MainCamera"
+							 component = "PROJECTION_INVERSE_MATRIX"
+                    />
+					<valueof uniform   = "LIGHT_SPACE_MAT"
+                             type      = "CAMERA"
+                             context   = "volfx#genShadowMap-LightCam"
+                             component = "TS05_PVM_MATRIX"
+                    />
+					<valueof uniform   = "LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+					<valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+					<valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT="0" name="emissPhaseTex"/>
+				<texture UNIT="1" name="scatExtinctionTex"/>
+				<texture UNIT="2" name="shadowMap">
+					<COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+					<COMPARE_FUNC value="LEQUAL"/>
+					<MIN_FILTER value="LINEAR"/>
+					<MAG_FILTER value="LINEAR"/>
+				</texture>
+			</textures>
+			<imageTextures>
+				<imageTexture UNIT="3" texture="scatteringTex">
 					<ACCESS value="WRITE_ONLY"/>
 					<LEVEL value="0"/>
 				</imageTexture>

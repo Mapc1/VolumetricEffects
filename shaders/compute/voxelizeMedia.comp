@@ -1,5 +1,4 @@
 #version 430
-#include <common.glsl>
 
 #define TEX_DIMS ivec3(480,270,64)
 
@@ -44,7 +43,7 @@ float camLightAngle(vec4 worldPos) {
 
 float henyeyGreenstein(vec4 worldPos) {
 	vec4 froxelCamDir = normalize(CAM_POS - worldPos);
-	vec4 froxelLightDir = normalize(-LIGHT_DIR);
+	vec4 froxelLightDir = normalize(LIGHT_DIR);
 
 	float cosAngle = dot(froxelCamDir, froxelLightDir);
 	float denom = 4*PI * pow((1+G*G - 2*G*cosAngle), 3/2);

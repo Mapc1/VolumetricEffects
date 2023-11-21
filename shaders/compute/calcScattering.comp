@@ -1,0 +1,57 @@
+#version 430
+
+#define TEX_DIMS ivec3(480,270,64)
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+// Output texture
+uniform writeonly image3D SCATTERING_UNIT;
+
+// Input textures
+uniform sampler3D EMISS_PHASE_UNIT;
+uniform sampler3D SCAT_EXTINCTION_UNIT;
+uniform sampler2DShadow SHADOW_MAP;
+
+// To get the world position of the froxel
+uniform mat4 INV_VIEW_MAT;
+uniform mat4 INV_PROJ_MAT;
+uniform float NEAR;
+uniform float FAR;
+
+// To sample shadow map
+uniform mat4 LIGHT_SPACE_MAT;
+
+uniform vec4 LIGHT_COLOR;
+
+vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
+
+
+float sampleShadowMap(vec4 worldPos) {
+	vec4 projShadowCoord = LIGHT_SPACE_MAT * worldPos;
+	return textureProj(SHADOW_MAP, projShadowCoord / projShadowCoord.w);
+}
+
+
+vec3 calcScattering(float extinction, float phase, float inLight, vec4 lightColor) {
+	return extinction * (phase * inLight * lightColor).rgb;
+}
+
+
+void main() {
+	ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
+	vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+
+	float inLight = sampleShadowMap(worldPos);
+	
+	// Fetch froxels
+	vec4 emissPhaseFroxel = texelFetch(EMISS_PHASE_UNIT, storeLoc, 0);
+	vec4 scatExtinctionFroxel = texelFetch(SCAT_EXTINCTION_UNIT, storeLoc, 0);
+
+	// Split data from froxels for better code readability
+	float phase = emissPhaseFroxel.a;
+	float extinction = scatExtinctionFroxel.a;
+	
+	vec3 lScat = calcScattering(extinction, phase, inLight, LIGHT_COLOR);
+
+	imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction));
+}

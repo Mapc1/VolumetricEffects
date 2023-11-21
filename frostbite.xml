@@ -55,6 +55,10 @@
 				<material name="voxelizeMedia" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="64"/>
 			</pass>
 
+			<pass class="compute" name="CalcScattering">
+				<material name="calcScattering" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="64"/>
+			</pass>
+
             <pass class="default" name="Render">
                 <scenes>
                     <scene name="Sponza"/>

@@ -16,7 +16,7 @@ out Data {
     vec3 normal;
     vec2 texCoord;
     vec3 lightDir;
-    vec4 pos;
+    vec4 worldPos;
 } DataOut;
 
 void main() {
@@ -24,7 +24,8 @@ void main() {
     DataOut.texCoord = vec2(texCoord0);
     DataOut.lightDir = normalize(vec3(V * -LIGHT_DIR));
     DataOut.projShadowCoord = LIGHT_SPACE_MAT * M * position;
-    DataOut.pos = position;
+    DataOut.worldPos = M * position;
+    DataOut.worldPos /= DataOut.worldPos.w;
 
     gl_Position = PVM * position; 
 }

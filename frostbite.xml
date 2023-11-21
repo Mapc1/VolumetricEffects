@@ -59,6 +59,10 @@
 				<material name="calcScattering" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="64"/>
 			</pass>
 
+			<pass class="compute" name="ScatIntegration">
+				<material name="scatIntegration" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="1"/>
+			</pass>
+
             <pass class="default" name="Render">
                 <scenes>
                     <scene name="Sponza"/>
@@ -72,6 +76,7 @@
                     <map toMaterial="*">
                         <shader fromMaterial="render" fromLibrary="Frostbite" />
                         <textures>
+							<texture name="integrationTex" fromLibrary="Frostbite" toUnit="2"/>
                             <texture name="shadowMap" fromLibrary="Frostbite" toUnit="1">
                                 <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                                 <COMPARE_FUNC value="LEQUAL"/>

@@ -12,21 +12,28 @@
 			<WIDTH value="480"/>
 			<HEIGHT value="270"/>
 			<DEPTH value="64"/>
-			<INTERNAL_FORMAT value="RGBA"/>
+			<INTERNAL_FORMAT value="RGBA16F"/>
  		</texture>
 
 		<texture name="scatExtinctionTex">
 			<WIDTH value="480"/>
 			<HEIGHT value="270"/>
 			<DEPTH value="64"/>
-			<INTERNAL_FORMAT value="RGBA"/>
+			<INTERNAL_FORMAT value="RGBA16F"/>
 		</texture>
 
 		<texture name="scatteringTex">
 			<WIDTH value="480"/>
 			<HEIGHT value="270"/>
 			<DEPTH value="64"/>
-			<INTERNAL_FORMAT value="RGBA"/>
+			<INTERNAL_FORMAT value="RGBA16F"/>
+		</texture>
+
+		<texture name="integrationTex">
+			<WIDTH value="480"/>
+			<HEIGHT value="270"/>
+			<DEPTH value="64"/>
+			<INTERNAL_FORMAT value="RGBA16F"/>
 		</texture>
 	</textures>
 
@@ -47,6 +54,12 @@
 				<file name="shaders/utils/common.glsl"/>
 			</cs>
 		</shader>
+		<shader name="scatIntegration">
+			<cs>
+				<file name="shaders/compute/scatIntegration.comp"/>
+				<file name="shaders/utils/common.glsl"/>
+			</cs>
+		</shader>
         <shader name="render">
             <vs>
                 <file name="shaders/render/render.vert"/>
@@ -54,6 +67,7 @@
             <ps>
                 <file name="shaders/render/render.frag"/>
                 <file name="shaders/utils/rand.glsl"/>
+				<file name="shaders/utils/common.glsl"/>
             </ps>
         </shader>
     </shaders>
@@ -213,6 +227,44 @@
 				</imageTexture>
 			</imageTextures>
 		</material>
+
+		<material name="scatIntegration">
+			<shader name="scatIntegration">
+				<values>
+					<valueof uniform   = "SCATTERING_UNIT"
+						     type      = "TEXTURE_BINDING"
+						     context   = "CURRENT"
+						     id        = "0"
+						     component = "UNIT"
+				    />
+					<valueof uniform   = "INTEGRATION_UNIT"
+							 type      = "IMAGE_TEXTURE"
+							 context   = "CURRENT"
+							 id        = "1"
+							 component = "UNIT"
+				    />
+					<valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+					<valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT="0" name="scatteringTex"/>
+			</textures>
+			<imageTextures>
+				<imageTexture UNIT="1" texture="integrationTex">
+					<ACCESS value="WRITE_ONLY"/>
+					<LEVEL value="0"/>
+				</imageTexture>
+			</imageTextures>
+		</material>
 		
         <material name="render">
             <shader name="render">
@@ -232,6 +284,11 @@
                              context   = "CURRENT"
                              component = "MODEL"
                     />
+					<valueof uniform   = "P"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION"
+                    />
                     <valueof uniform   = "NORMAL_MAT"
                              type      = "RENDERER"
                              context   = "CURRENT"
@@ -247,7 +304,12 @@
                              context   = "volfx#genShadowMap-LightCam"
                              component = "TS05_PVM_MATRIX" 
                     />
-                    
+					<valueof uniform   = "INTEGRATION_UNIT"
+						     type      = "TEXTURE_BINDING"
+						     context   = "CURRENT"
+						     id        = "2"
+						     component = "UNIT"
+				    />
                     <valueof uniform   = "SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              context   = "CURRENT"
@@ -259,6 +321,16 @@
                              context   = "CURRENT"
                              component = "UNIT"
                              id        = "0"
+                    />	
+					<valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+					<valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
                     />
                 </values>
             </shader>
@@ -270,6 +342,7 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
+				<texture UNIT="2" name="integrationTex"/>
             </textures>
         </material>
     </materials>

@@ -4,6 +4,11 @@
 
 uniform sampler2DShadow SHADOW_MAP;
 uniform sampler2D TEX_UNIT;
+uniform sampler3D INTEGRATION_UNIT;
+
+uniform mat4 V, P;
+uniform float NEAR;
+uniform float FAR;
 
 
 in Data {
@@ -11,13 +16,14 @@ in Data {
     vec3 normal;
     vec2 texCoord;
     vec3 lightDir;
-    vec4 pos;
+    vec4 worldPos;
 } DataIn;
 
 
 out vec4 FragColor;
 
 float rand(vec2 co);
+vec3 world_to_uv(vec3 world_pos, float n, float f, float depth_power, mat4 vp);
 
 float shadowIlumination(vec3 normal, vec3 lightDir) {
     // If the surface is facing away from the light we don't add any illumination    
@@ -50,6 +56,13 @@ void main() {
     vec4 color = diff * 0.25;
 
     color += diff * shadowIlumination(normal,DataIn.lightDir);
+
+    vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, P*V);
+    vec4 scatTransmittance = texture(INTEGRATION_UNIT, uvw);
+    vec3 inScattering = scatTransmittance.rgb;
+    float transmittance = scatTransmittance.a;
+
+    color.rgb = color.rgb * transmittance + inScattering;
 
     FragColor = color;
 }

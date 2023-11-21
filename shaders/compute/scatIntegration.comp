@@ -1,0 +1,46 @@
+#version 430
+
+#define TEX_DIMS ivec3(480,270,64)
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+// Output texture
+uniform writeonly image3D INTEGRATION_UNIT;
+
+uniform sampler3D SCATTERING_UNIT;
+
+// To get the world position of the froxel
+uniform float NEAR;
+uniform float FAR;
+
+vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
+
+
+float sliceDist(int slice) {
+	return NEAR * pow(FAR/NEAR, (float(slice)+0.5) / float(TEX_DIMS.z));
+}
+
+
+float sliceThickness(int slice) {
+	return abs(sliceDist(slice+1) - sliceDist(slice));
+}
+
+
+void main() {
+	vec4 accumScattering = vec4(0.0,0.0,0.0,1.0);
+	for (int i = 0; i < TEX_DIMS.z; i++) {
+		ivec3 storeLoc = ivec3(gl_GlobalInvocationID.xy, i);
+		float thickness = sliceThickness(storeLoc.z);
+
+		vec4 scatExtinction = texelFetch(SCATTERING_UNIT, storeLoc, 0);
+		vec3 froxelScattering = scatExtinction.rgb;
+		float froxelExtinction = scatExtinction.a;
+
+		float sliceTransimttance = exp(-froxelExtinction*thickness*0.01);
+
+		accumScattering.rgb += froxelScattering * (1.0 - sliceTransimttance);
+		accumScattering.a *= sliceTransimttance;
+
+		imageStore(INTEGRATION_UNIT, storeLoc, accumScattering);
+	}
+}

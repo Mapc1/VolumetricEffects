@@ -31,7 +31,7 @@
         </lights>
 
         <materialLibs>
-            <materialLib filename="frostbite.mtl"/>
+            <materialLib filename="frostbite.mlib"/>
         </materialLibs>
     </assets>
 
@@ -50,6 +50,10 @@
                     <map fromMaterial="*" toLibrary="Frostbite" toMaterial="shadowMap"/>
                 </materialMaps>
             </pass>
+
+			<pass class="compute" name="VoxelizeMedia">
+				<material name="voxelizeMedia" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="64"/>
+			</pass>
 
             <pass class="default" name="Render">
                 <scenes>

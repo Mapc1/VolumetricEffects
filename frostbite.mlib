@@ -7,11 +7,33 @@
         </renderTarget>
     </renderTargets>
 
+	<textures>
+		<texture name="emissPhaseTex">
+			<WIDTH value="480"/>
+			<HEIGHT value="270"/>
+			<DEPTH value="64"/>
+			<INTERNAL_FORMAT value="RGBA"/>
+ 		</texture>
+
+		<texture name="scatExtinctionTex">
+			<WIDTH value="480"/>
+			<HEIGHT value="270"/>
+			<DEPTH value="64"/>
+			<INTERNAL_FORMAT value="RGBA"/>
+		</texture>
+	</textures>
+
     <shaders>
         <shader name="genShadowMap"
                   vs="shaders/shadow_map/shadowMap.vert"
                   ps="shaders/shadow_map/shadowMap.frag"
         />
+		<shader name="voxelizeMedia">
+			<cs>
+				<file name="shaders/compute/voxelizeMedia.comp"/>
+				<file name="shaders/utils/common.glsl"/>
+			</cs>
+		</shader>
         <shader name="render">
             <vs>
                 <file name="shaders/render/render.vert"/>
@@ -30,6 +52,78 @@
     </states>
 
     <materials>
+		<material name="shadowMap">
+			<shader name="genShadowMap">
+				<values>
+					<valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+				</values>
+			</shader>
+			<state name="frontCull"/>
+		</material>
+
+		<material name="voxelizeMedia">
+			<shader name="voxelizeMedia">
+				<values>
+					<valueof uniform   = "EMISS_PHASE_UNIT"
+						     type      = "IMAGE_TEXTURE"
+						     context   = "CURRENT"
+						     id        = "0"
+						     component = "UNIT"
+				    />
+					<valueof uniform   = "SCAT_EXTINCTION_UNIT"
+							 type      = "IMAGE_TEXTURE"
+							 context   = "CURRENT"
+							 id        = "1"
+							 component = "UNIT"
+				    />
+					<valueof uniform   = "CAM_POS"
+							 type      = "CAMERA"
+							 context   = "MainCamera"
+							 component = "POSITION"
+				    />
+					<valueof uniform   = "LIGHT_DIR"
+							 type      = "LIGHT"
+							 context   = "Sun"
+							 component = "DIRECTION"
+                    />
+					<valueof uniform   = "INV_VIEW_MAT"
+							 type      = "CAMERA"
+							 context   = "MainCamera"
+							 component = "VIEW_INVERSE_MATRIX"
+                    />
+					<valueof uniform   = "INV_PROJ_MAT"
+							 type      = "CAMERA"
+							 context   = "MainCamera"
+							 component = "PROJECTION_INVERSE_MATRIX"
+                    />
+				    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+					<valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+				</values>
+			</shader>
+			<imageTextures>
+				<imageTexture UNIT="0" texture="emissPhaseTex">
+					<ACCESS value="WRITE_ONLY"/>
+					<LEVEL value="0"/>
+				</imageTexture>
+				<imageTexture UNIT="1" texture="scatExtinctionTex">
+					<ACCESS value="WRITE_ONLY"/>
+					<LEVEL value="0"/>
+				</imageTexture>
+			</imageTextures>
+		</material>
+		
         <material name="render">
             <shader name="render">
                 <values>
@@ -87,19 +181,6 @@
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
             </textures>
-        </material>
-
-        <material name="shadowMap">
-            <shader name="genShadowMap">
-                <values>
-                    <valueof uniform   = "PVM" 
-                             type      = "RENDERER"
-                             context   = "CURRENT"
-                             component = "PROJECTION_VIEW_MODEL"
-                    />
-                </values>
-            </shader>
-            <state name="frontCull"/>
         </material>
     </materials>
 </materialLib>

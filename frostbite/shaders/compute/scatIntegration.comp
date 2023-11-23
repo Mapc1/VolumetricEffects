@@ -17,30 +17,30 @@ vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
 
 float sliceDist(int slice) {
-	return NEAR * pow(FAR/NEAR, (float(slice)+0.5) / float(TEX_DIMS.z));
+    return NEAR * pow(FAR/NEAR, (float(slice)+0.5) / float(TEX_DIMS.z));
 }
 
 
 float sliceThickness(int slice) {
-	return abs(sliceDist(slice+1) - sliceDist(slice));
+    return abs(sliceDist(slice+1) - sliceDist(slice));
 }
 
 
 void main() {
-	vec4 accumScattering = vec4(0.0,0.0,0.0,1.0);
-	for (int i = 0; i < TEX_DIMS.z; i++) {
-		ivec3 storeLoc = ivec3(gl_GlobalInvocationID.xy, i);
-		float thickness = sliceThickness(storeLoc.z);
+    vec4 accumScattering = vec4(0.0,0.0,0.0,1.0);
+    for (int i = 0; i < TEX_DIMS.z; i++) {
+        ivec3 storeLoc = ivec3(gl_GlobalInvocationID.xy, i);
+        float thickness = sliceThickness(storeLoc.z);
 
-		vec4 scatExtinction = texelFetch(SCATTERING_UNIT, storeLoc, 0);
-		vec3 froxelScattering = scatExtinction.rgb;
-		float froxelExtinction = scatExtinction.a;
+        vec4 scatExtinction = texelFetch(SCATTERING_UNIT, storeLoc, 0);
+        vec3 froxelScattering = scatExtinction.rgb;
+        float froxelExtinction = scatExtinction.a;
 
-		float sliceTransimttance = exp(-froxelExtinction*thickness*0.01);
+        float sliceTransimttance = exp(-froxelExtinction*thickness*0.01);
 
-		accumScattering.rgb += froxelScattering * (1.0 - sliceTransimttance);
-		accumScattering.a *= sliceTransimttance;
+        accumScattering.rgb += froxelScattering * (1.0 - sliceTransimttance);
+        accumScattering.a *= sliceTransimttance;
 
-		imageStore(INTEGRATION_UNIT, storeLoc, accumScattering);
-	}
+        imageStore(INTEGRATION_UNIT, storeLoc, accumScattering);
+    }
 }

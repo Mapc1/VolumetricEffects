@@ -54,17 +54,17 @@
                 </materialMaps>
             </pass>
 
-			<pass class="compute" name="VoxelizeMedia">
-				<material name="voxelizeMedia" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="128"/>
-			</pass>
+            <pass class="compute" name="VoxelizeMedia">
+                <material name="voxelizeMedia" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="128"/>
+            </pass>
 
-			<pass class="compute" name="CalcScattering">
-				<material name="calcScattering" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="128"/>
-			</pass>
+            <pass class="compute" name="CalcScattering">
+                <material name="calcScattering" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="128"/>
+            </pass>
 
-			<pass class="compute" name="ScatIntegration">
-				<material name="scatIntegration" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="1"/>
-			</pass>
+            <pass class="compute" name="ScatIntegration">
+                <material name="scatIntegration" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="1"/>
+            </pass>
 
             <pass class="default" name="Render">
                 <scenes>

@@ -27,33 +27,33 @@ vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
 
 float sampleShadowMap(vec4 worldPos) {
-	vec4 projShadowCoord = LIGHT_SPACE_MAT * worldPos;
-	return textureProj(SHADOW_MAP, projShadowCoord / projShadowCoord.w);
+    vec4 projShadowCoord = LIGHT_SPACE_MAT * worldPos;
+    return textureProj(SHADOW_MAP, projShadowCoord / projShadowCoord.w);
 }
 
 
 vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor) {
-	return albedo * (phase * inLight * lightColor).rgb;
+    return albedo * (phase * inLight * lightColor).rgb;
 }
 
 
 void main() {
-	ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
-	vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+    ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
+    vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
 
-	float inLight = sampleShadowMap(worldPos);
-	
-	// Fetch froxels
-	vec4 emissPhaseFroxel = texelFetch(EMISS_PHASE_UNIT, storeLoc, 0);
-	vec4 scatExtinctionFroxel = texelFetch(SCAT_EXTINCTION_UNIT, storeLoc, 0);
+    float inLight = sampleShadowMap(worldPos);
+    
+    // Fetch froxels
+    vec4 emissPhaseFroxel = texelFetch(EMISS_PHASE_UNIT, storeLoc, 0);
+    vec4 scatExtinctionFroxel = texelFetch(SCAT_EXTINCTION_UNIT, storeLoc, 0);
 
-	// Split data from froxels for better code readability
-	float phase = emissPhaseFroxel.a;
-	float extinction = scatExtinctionFroxel.a;
-	vec3 scattering = scatExtinctionFroxel.rgb;
-	vec3 albedo = scattering / extinction;
-	
-	vec3 lScat = calcScattering(albedo, phase, inLight, LIGHT_COLOR);
+    // Split data from froxels for better code readability
+    float phase = emissPhaseFroxel.a;
+    float extinction = scatExtinctionFroxel.a;
+    vec3 scattering = scatExtinctionFroxel.rgb;
+    vec3 albedo = scattering / extinction;
+    
+    vec3 lScat = calcScattering(albedo, phase, inLight, LIGHT_COLOR);
 
-	imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction));
+    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction));
 }

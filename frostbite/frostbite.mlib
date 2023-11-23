@@ -7,68 +7,68 @@
         </renderTarget>
     </renderTargets>
 
-	<textures>
-		<texture name="emissPhaseTex">
-			<WIDTH value="240"/>
-			<HEIGHT value="135"/>
-			<DEPTH value="128"/>
-			<INTERNAL_FORMAT value="RGBA16F"/>
- 		</texture>
+    <textures>
+        <texture name="emissPhaseTex">
+            <WIDTH value="240"/>
+            <HEIGHT value="135"/>
+            <DEPTH value="128"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+         </texture>
 
-		<texture name="scatExtinctionTex">
-			<WIDTH value="240"/>
-			<HEIGHT value="135"/>
-			<DEPTH value="128"/>
-			<INTERNAL_FORMAT value="RGBA16F"/>
-		</texture>
+        <texture name="scatExtinctionTex">
+            <WIDTH value="240"/>
+            <HEIGHT value="135"/>
+            <DEPTH value="128"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+        </texture>
 
-		<texture name="scatteringTex">
-			<WIDTH value="240"/>
-			<HEIGHT value="135"/>
-			<DEPTH value="128"/>
-			<INTERNAL_FORMAT value="RGBA16F"/>
-		</texture>
+        <texture name="scatteringTex">
+            <WIDTH value="240"/>
+            <HEIGHT value="135"/>
+            <DEPTH value="128"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+        </texture>
 
-		<texture name="integrationTex">
-			<WIDTH value="240"/>
-			<HEIGHT value="135"/>
-			<DEPTH value="128"/>
-			<INTERNAL_FORMAT value="RGBA16F"/>
-		</texture>
+        <texture name="integrationTex">
+            <WIDTH value="240"/>
+            <HEIGHT value="135"/>
+            <DEPTH value="128"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+        </texture>
 
-		<cubeMap name="skyBox"
-				 filePosX="../textures/skybox/px.png"
-				 fileNegX="../textures/skybox/nx.png"
-				 filePosY="../textures/skybox/ny.png"
-				 fileNegY="../textures/skybox/py.png"
-				 filePosZ="../textures/skybox/pz.png"
-				 fileNegZ="../textures/skybox/nz.png"
-		/>
-	</textures>
+        <cubeMap name="skyBox"
+                 filePosX="../textures/skybox/px.png"
+                 fileNegX="../textures/skybox/nx.png"
+                 filePosY="../textures/skybox/ny.png"
+                 fileNegY="../textures/skybox/py.png"
+                 filePosZ="../textures/skybox/pz.png"
+                 fileNegZ="../textures/skybox/nz.png"
+        />
+    </textures>
 
     <shaders>
         <shader name="genShadowMap"
                   vs="shaders/shadow_map/shadowMap.vert"
                   ps="shaders/shadow_map/shadowMap.frag"
         />
-		<shader name="voxelizeMedia">
-			<cs>
-				<file name="shaders/compute/voxelizeMedia.comp"/>
-				<file name="shaders/utils/common.glsl"/>
-			</cs>
-		</shader>
-		<shader name="calcScattering">
-			<cs>
-				<file name="shaders/compute/calcScattering.comp"/>
-				<file name="shaders/utils/common.glsl"/>
-			</cs>
-		</shader>
-		<shader name="scatIntegration">
-			<cs>
-				<file name="shaders/compute/scatIntegration.comp"/>
-				<file name="shaders/utils/common.glsl"/>
-			</cs>
-		</shader>
+        <shader name="voxelizeMedia">
+            <cs>
+                <file name="shaders/compute/voxelizeMedia.comp"/>
+                <file name="shaders/utils/common.glsl"/>
+            </cs>
+        </shader>
+        <shader name="calcScattering">
+            <cs>
+                <file name="shaders/compute/calcScattering.comp"/>
+                <file name="shaders/utils/common.glsl"/>
+            </cs>
+        </shader>
+        <shader name="scatIntegration">
+            <cs>
+                <file name="shaders/compute/scatIntegration.comp"/>
+                <file name="shaders/utils/common.glsl"/>
+            </cs>
+        </shader>
         <shader name="render">
             <vs>
                 <file name="shaders/render/render.vert"/>
@@ -76,22 +76,22 @@
             <ps>
                 <file name="shaders/render/render.frag"/>
                 <file name="shaders/utils/rand.glsl"/>
-				<file name="shaders/utils/common.glsl"/>
+                <file name="shaders/utils/common.glsl"/>
             </ps>
         </shader>
-		<shader name="skyBox">
-			<vs>
-				<file name="shaders/render/skyBox.vert"/>
-			</vs>
-			<ps>
-				<file name="shaders/render/skyBox.frag"/>
-				<file name="shaders/utils/common.glsl"/>
-			</ps>
-		</shader>
+        <shader name="skyBox">
+            <vs>
+                <file name="shaders/render/skyBox.vert"/>
+            </vs>
+            <ps>
+                <file name="shaders/render/skyBox.frag"/>
+                <file name="shaders/utils/common.glsl"/>
+            </ps>
+        </shader>
     </shaders>
 
     <states>
-		<state name="skyBox" >
+        <state name="skyBox" >
             <CULL_TYPE value="FRONT" />
             <DEPTH_MASK value="false" />
         </state>
@@ -101,208 +101,208 @@
     </states>
 
     <materials>
-		<material name="shadowMap">
-			<shader name="genShadowMap">
-				<values>
-					<valueof uniform   = "PVM"
+        <material name="shadowMap">
+            <shader name="genShadowMap">
+                <values>
+                    <valueof uniform   = "PVM"
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "PROJECTION_VIEW_MODEL"
                     />
-				</values>
-			</shader>
-			<state name="frontCull"/>
-		</material>
+                </values>
+            </shader>
+            <state name="frontCull"/>
+        </material>
 
-		<material name="voxelizeMedia">
-			<shader name="voxelizeMedia">
-				<values>
-					<valueof uniform   = "EMISS_PHASE_UNIT"
-						     type      = "IMAGE_TEXTURE"
-						     context   = "CURRENT"
-						     id        = "0"
-						     component = "UNIT"
-				    />
-					<valueof uniform   = "SCAT_EXTINCTION_UNIT"
-							 type      = "IMAGE_TEXTURE"
-							 context   = "CURRENT"
-							 id        = "1"
-							 component = "UNIT"
-				    />
-					<valueof uniform   = "CAM_POS"
-							 type      = "CAMERA"
-							 context   = "MainCamera"
-							 component = "POSITION"
-				    />
-					<valueof uniform   = "LIGHT_DIR"
-							 type      = "LIGHT"
-							 context   = "Sun"
-							 component = "DIRECTION"
+        <material name="voxelizeMedia">
+            <shader name="voxelizeMedia">
+                <values>
+                    <valueof uniform   = "EMISS_PHASE_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
                     />
-					<valueof uniform   = "INV_VIEW_MAT"
-							 type      = "CAMERA"
-							 context   = "MainCamera"
-							 component = "VIEW_INVERSE_MATRIX"
+                    <valueof uniform   = "SCAT_EXTINCTION_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
                     />
-					<valueof uniform   = "INV_PROJ_MAT"
-							 type      = "CAMERA"
-							 context   = "MainCamera"
-							 component = "PROJECTION_INVERSE_MATRIX"
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
                     />
-				    <valueof uniform   = "NEAR"
+                    <valueof uniform   = "LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "INV_VIEW_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "VIEW_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "INV_PROJ_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "PROJECTION_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "NEAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "NEAR"
                     />
-					<valueof uniform   = "FAR"
+                    <valueof uniform   = "FAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
                     />
-				</values>
-			</shader>
-			<imageTextures>
-				<imageTexture UNIT="0" texture="emissPhaseTex">
-					<ACCESS value="WRITE_ONLY"/>
-					<LEVEL value="0"/>
-				</imageTexture>
-				<imageTexture UNIT="1" texture="scatExtinctionTex">
-					<ACCESS value="WRITE_ONLY"/>
-					<LEVEL value="0"/>
-				</imageTexture>
-			</imageTextures>
-		</material>
+                </values>
+            </shader>
+            <imageTextures>
+                <imageTexture UNIT="0" texture="emissPhaseTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+                <imageTexture UNIT="1" texture="scatExtinctionTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures>
+        </material>
 
-		<material name="calcScattering">
-			<shader name="calcScattering">
-				<values>
-					<valueof uniform   = "EMISS_PHASE_UNIT"
-						     type      = "TEXTURE_BINDING"
-						     context   = "CURRENT"
-						     id        = "0"
-						     component = "UNIT"
-				    />
-					<valueof uniform   = "SCAT_EXTINCTION_UNIT"
-							 type      = "TEXTURE_BINDING"
-							 context   = "CURRENT"
-							 id        = "1"
-							 component = "UNIT"
-				    />
-					<valueof uniform   = "SHADOW_MAP"
-							 type      = "TEXTURE_BINDING"
-							 context   = "CURRENT"
-							 id        = "2"
-							 component = "UNIT"
-				    />
-					<valueof uniform   = "SCATTERING_UNIT"
-							 type      = "IMAGE_TEXTURE"
-							 context   = "CURRENT"
-							 id        = "3"
-							 component = "UNIT"
-				    />
-					<valueof uniform   = "INV_VIEW_MAT"
-							 type      = "CAMERA"
-							 context   = "MainCamera"
-							 component = "VIEW_INVERSE_MATRIX"
+        <material name="calcScattering">
+            <shader name="calcScattering">
+                <values>
+                    <valueof uniform   = "EMISS_PHASE_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
                     />
-					<valueof uniform   = "INV_PROJ_MAT"
-							 type      = "CAMERA"
-							 context   = "MainCamera"
-							 component = "PROJECTION_INVERSE_MATRIX"
+                    <valueof uniform   = "SCAT_EXTINCTION_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
                     />
-					<valueof uniform   = "LIGHT_SPACE_MAT"
+                    <valueof uniform   = "SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "2"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "SCATTERING_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "3"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "INV_VIEW_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "VIEW_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "INV_PROJ_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "PROJECTION_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "LIGHT_SPACE_MAT"
                              type      = "CAMERA"
                              context   = "volfx#genShadowMap-LightCam"
                              component = "TS05_PVM_MATRIX"
                     />
-					<valueof uniform   = "LIGHT_COLOR"
+                    <valueof uniform   = "LIGHT_COLOR"
                              type      = "LIGHT"
                              context   = "Sun"
                              component = "COLOR"
                     />
-					<valueof uniform   = "NEAR"
+                    <valueof uniform   = "NEAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "NEAR"
                     />
-					<valueof uniform   = "FAR"
+                    <valueof uniform   = "FAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
                     />
-				</values>
-			</shader>
-			<textures>
-				<texture UNIT="0" name="emissPhaseTex"/>
-				<texture UNIT="1" name="scatExtinctionTex"/>
-				<texture UNIT="2" name="shadowMap">
-					<COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-					<COMPARE_FUNC value="LEQUAL"/>
-					<MIN_FILTER value="LINEAR"/>
-					<MAG_FILTER value="LINEAR"/>
-				</texture>
-			</textures>
-			<imageTextures>
-				<imageTexture UNIT="3" texture="scatteringTex">
-					<ACCESS value="WRITE_ONLY"/>
-					<LEVEL value="0"/>
-				</imageTexture>
-			</imageTextures>
-		</material>
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="emissPhaseTex"/>
+                <texture UNIT="1" name="scatExtinctionTex"/>
+                <texture UNIT="2" name="shadowMap">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+            <imageTextures>
+                <imageTexture UNIT="3" texture="scatteringTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures>
+        </material>
 
-		<material name="scatIntegration">
-			<shader name="scatIntegration">
-				<values>
-					<valueof uniform   = "SCATTERING_UNIT"
-						     type      = "TEXTURE_BINDING"
-						     context   = "CURRENT"
-						     id        = "0"
-						     component = "UNIT"
-				    />
-					<valueof uniform   = "INTEGRATION_UNIT"
-							 type      = "IMAGE_TEXTURE"
-							 context   = "CURRENT"
-							 id        = "1"
-							 component = "UNIT"
-				    />
-					<valueof uniform   = "NEAR"
+        <material name="scatIntegration">
+            <shader name="scatIntegration">
+                <values>
+                    <valueof uniform   = "SCATTERING_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "INTEGRATION_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "NEAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "NEAR"
                     />
-					<valueof uniform   = "FAR"
+                    <valueof uniform   = "FAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
                     />
-				</values>
-			</shader>
-			<textures>
-				<texture UNIT="0" name="scatteringTex"/>
-			</textures>
-			<imageTextures>
-				<imageTexture UNIT="1" texture="integrationTex">
-					<ACCESS value="WRITE_ONLY"/>
-					<LEVEL value="0"/>
-				</imageTexture>
-			</imageTextures>
-		</material>
-		
-		<material name="skyBox">
-			<shader name="skyBox">
-				<values>
-					<valueof uniform   = "CUBEMAP"
-    	                     type      = "TEXTURE_BINDING"
-    	                     context   = "CURRENT"
-    	                     id        = "0"
-    	                     component = "UNIT"
-    	            />
-					<valueof uniform   = "INTEGRATION_UNIT"
-						     type      = "TEXTURE_BINDING"
-						     context   = "CURRENT"
-						     id        = "1"
-						     component = "UNIT"
-				    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="scatteringTex"/>
+            </textures>
+            <imageTextures>
+                <imageTexture UNIT="1" texture="integrationTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures>
+        </material>
+        
+        <material name="skyBox">
+            <shader name="skyBox">
+                <values>
+                    <valueof uniform   = "CUBEMAP"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "INTEGRATION_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
                     <valueof uniform   = "PVM"
                              type      = "RENDERER"
                              context   = "CURRENT"
@@ -313,42 +313,42 @@
                              context   = "CURRENT"
                              component = "MODEL"
                     />
-					<valueof uniform   = "V"
+                    <valueof uniform   = "V"
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "VIEW"
                     />
-					<valueof uniform   = "P"
+                    <valueof uniform   = "P"
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "PROJECTION"
                     />
-					<valueof uniform   = "CAM_POS"
-							 type      = "CAMERA"
-							 context   = "MainCamera"
-							 component = "POSITION"
-				    />
-					<valueof uniform   = "NEAR"
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "NEAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "NEAR"
                     />
-					<valueof uniform   = "FAR"
+                    <valueof uniform   = "FAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
                     />
-				</values>
-			</shader>
-			<textures>
-				<texture UNIT="0" name="skyBox"/>
-				<texture UNIT="1" name="integrationTex">
-					<MIN_FILTER value="LINEAR"/>
-					<MAG_FILTER value="LINEAR"/>
-				</texture>
-			</textures>
-			<state name="skyBox"/>
-		</material>
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="skyBox"/>
+                <texture UNIT="1" name="integrationTex">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+            <state name="skyBox"/>
+        </material>
 
         <material name="render">
             <shader name="render">
@@ -368,7 +368,7 @@
                              context   = "CURRENT"
                              component = "MODEL"
                     />
-					<valueof uniform   = "P"
+                    <valueof uniform   = "P"
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "PROJECTION"
@@ -388,12 +388,12 @@
                              context   = "volfx#genShadowMap-LightCam"
                              component = "TS05_PVM_MATRIX" 
                     />
-					<valueof uniform   = "INTEGRATION_UNIT"
-						     type      = "TEXTURE_BINDING"
-						     context   = "CURRENT"
-						     id        = "2"
-						     component = "UNIT"
-				    />
+                    <valueof uniform   = "INTEGRATION_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "2"
+                             component = "UNIT"
+                    />
                     <valueof uniform   = "SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              context   = "CURRENT"
@@ -405,13 +405,13 @@
                              context   = "CURRENT"
                              component = "UNIT"
                              id        = "0"
-                    />	
-					<valueof uniform   = "NEAR"
+                    />    
+                    <valueof uniform   = "NEAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "NEAR"
                     />
-					<valueof uniform   = "FAR"
+                    <valueof uniform   = "FAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
@@ -426,9 +426,9 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
-				<texture UNIT="2" name="integrationTex">
-					<MIN_FILTER value="LINEAR"/>
-					<MAG_FILTER value="LINEAR"/>
+                <texture UNIT="2" name="integrationTex">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
                 </texture>
             </textures>
         </material>

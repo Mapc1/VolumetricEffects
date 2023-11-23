@@ -34,29 +34,29 @@ vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
 
 float camLightAngle(vec4 worldPos) {
-	vec4 froxelCamDir = normalize(CAM_POS - worldPos);
-	vec4 froxelLightDir = normalize(-LIGHT_DIR);
+    vec4 froxelCamDir = normalize(CAM_POS - worldPos);
+    vec4 froxelLightDir = normalize(-LIGHT_DIR);
 
-	return acos(dot(froxelLightDir, froxelCamDir));
+    return acos(dot(froxelLightDir, froxelCamDir));
 }
 
 
 float henyeyGreenstein(vec4 worldPos) {
-	vec4 froxelCamDir = normalize(CAM_POS - worldPos);
-	vec4 froxelLightDir = normalize(LIGHT_DIR);
+    vec4 froxelCamDir = normalize(CAM_POS - worldPos);
+    vec4 froxelLightDir = normalize(LIGHT_DIR);
 
-	float cosAngle = dot(froxelCamDir, froxelLightDir);
-	float denom = 4*PI * pow((1+G*G - 2*G*cosAngle), 3/2);
+    float cosAngle = dot(froxelCamDir, froxelLightDir);
+    float denom = 4*PI * pow((1+G*G - 2*G*cosAngle), 3/2);
     return (1-G*G) / denom;
 }
 
 
 void main() {
-	ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
-	vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+    ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
+    vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
 
-	float phase = henyeyGreenstein(worldPos);
+    float phase = henyeyGreenstein(worldPos);
 
-	imageStore(EMISS_PHASE_UNIT, storeLoc, vec4(EMISS,phase));
-	imageStore(SCAT_EXTINCTION_UNIT, storeLoc, vec4(SCATTERING,EXTINCTION));
+    imageStore(EMISS_PHASE_UNIT, storeLoc, vec4(EMISS,phase));
+    imageStore(SCAT_EXTINCTION_UNIT, storeLoc, vec4(SCATTERING,EXTINCTION));
 }

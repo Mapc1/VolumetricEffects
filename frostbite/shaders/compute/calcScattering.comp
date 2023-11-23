@@ -1,6 +1,6 @@
 #version 430
 
-#define TEX_DIMS ivec3(480,270,64)
+#define TEX_DIMS ivec3(240,135,128)
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -32,8 +32,8 @@ float sampleShadowMap(vec4 worldPos) {
 }
 
 
-vec3 calcScattering(float extinction, float phase, float inLight, vec4 lightColor) {
-	return extinction * (phase * inLight * lightColor).rgb;
+vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor) {
+	return albedo * (phase * inLight * lightColor).rgb;
 }
 
 
@@ -50,8 +50,10 @@ void main() {
 	// Split data from froxels for better code readability
 	float phase = emissPhaseFroxel.a;
 	float extinction = scatExtinctionFroxel.a;
+	vec3 scattering = scatExtinctionFroxel.rgb;
+	vec3 albedo = scattering / extinction;
 	
-	vec3 lScat = calcScattering(extinction, phase, inLight, LIGHT_COLOR);
+	vec3 lScat = calcScattering(albedo, phase, inLight, LIGHT_COLOR);
 
 	imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction));
 }

@@ -2,8 +2,11 @@
 <project name="Frostbite Volumetric Effects" width="1280" height="720">
     <assets>
         <scenes>
-            <scene name="Sponza">
-                <file name="..\models\sponza\sponza.obj"/>
+            <scene name="Sponza" filename="..\models\sponza\sponza.obj" param="UNITIZE"/>
+            <scene name="SkyBox">
+                <geometry name="Box" type="BOX" material="skyBox">
+                    <SCALE x="2" y="2" z="2"/>
+                </geometry>
             </scene>
         </scenes>
 
@@ -16,9 +19,9 @@
         <cameras>
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
-                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="2000.0"/>
-                <POSITION x="0.0" y="900.0" z="0.0"/>
-                <VIEW x="100.0" y="10.0" z="100.0"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="0.01" FAR="4.0"/>
+                <POSITION x="0.0" y="0.2" z="0.0"/>
+                <VIEW x="10.0" y="10.0" z="100.0"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
         </cameras>
@@ -52,20 +55,21 @@
             </pass>
 
 			<pass class="compute" name="VoxelizeMedia">
-				<material name="voxelizeMedia" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="64"/>
+				<material name="voxelizeMedia" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="128"/>
 			</pass>
 
 			<pass class="compute" name="CalcScattering">
-				<material name="calcScattering" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="64"/>
+				<material name="calcScattering" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="128"/>
 			</pass>
 
 			<pass class="compute" name="ScatIntegration">
-				<material name="scatIntegration" fromLibrary="Frostbite" dimX="480" dimY="270" dimZ="1"/>
+				<material name="scatIntegration" fromLibrary="Frostbite" dimX="240" dimY="135" dimZ="1"/>
 			</pass>
 
             <pass class="default" name="Render">
                 <scenes>
                     <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
                 </scenes>
                 <camera name="MainCamera"/>
                 <lights>
@@ -76,7 +80,10 @@
                     <map toMaterial="*">
                         <shader fromMaterial="render" fromLibrary="Frostbite" />
                         <textures>
-							<texture name="integrationTex" fromLibrary="Frostbite" toUnit="2"/>
+                            <texture name="integrationTex" fromLibrary="Frostbite" toUnit="2">
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
                             <texture name="shadowMap" fromLibrary="Frostbite" toUnit="1">
                                 <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                                 <COMPARE_FUNC value="LEQUAL"/>
@@ -84,8 +91,11 @@
                                 <MAG_FILTER value="NEAREST"/>
                             </texture>
                         </textures>
-                    </map>
+                    </map>    
                 </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skyBox" toLibrary="Frostbite" toMaterial="skyBox"/>
+                </materialMaps>
             </pass>
         </pipeline>
     </pipelines>

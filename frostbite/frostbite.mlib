@@ -9,32 +9,41 @@
 
 	<textures>
 		<texture name="emissPhaseTex">
-			<WIDTH value="480"/>
-			<HEIGHT value="270"/>
-			<DEPTH value="64"/>
+			<WIDTH value="240"/>
+			<HEIGHT value="135"/>
+			<DEPTH value="128"/>
 			<INTERNAL_FORMAT value="RGBA16F"/>
  		</texture>
 
 		<texture name="scatExtinctionTex">
-			<WIDTH value="480"/>
-			<HEIGHT value="270"/>
-			<DEPTH value="64"/>
+			<WIDTH value="240"/>
+			<HEIGHT value="135"/>
+			<DEPTH value="128"/>
 			<INTERNAL_FORMAT value="RGBA16F"/>
 		</texture>
 
 		<texture name="scatteringTex">
-			<WIDTH value="480"/>
-			<HEIGHT value="270"/>
-			<DEPTH value="64"/>
+			<WIDTH value="240"/>
+			<HEIGHT value="135"/>
+			<DEPTH value="128"/>
 			<INTERNAL_FORMAT value="RGBA16F"/>
 		</texture>
 
 		<texture name="integrationTex">
-			<WIDTH value="480"/>
-			<HEIGHT value="270"/>
-			<DEPTH value="64"/>
+			<WIDTH value="240"/>
+			<HEIGHT value="135"/>
+			<DEPTH value="128"/>
 			<INTERNAL_FORMAT value="RGBA16F"/>
 		</texture>
+
+		<cubeMap name="skyBox"
+				 filePosX="../textures/skybox/px.png"
+				 fileNegX="../textures/skybox/nx.png"
+				 filePosY="../textures/skybox/ny.png"
+				 fileNegY="../textures/skybox/py.png"
+				 filePosZ="../textures/skybox/pz.png"
+				 fileNegZ="../textures/skybox/nz.png"
+		/>
 	</textures>
 
     <shaders>
@@ -70,9 +79,22 @@
 				<file name="shaders/utils/common.glsl"/>
             </ps>
         </shader>
+		<shader name="skyBox">
+			<vs>
+				<file name="shaders/render/skyBox.vert"/>
+			</vs>
+			<ps>
+				<file name="shaders/render/skyBox.frag"/>
+				<file name="shaders/utils/common.glsl"/>
+			</ps>
+		</shader>
     </shaders>
 
     <states>
+		<state name="skyBox" >
+            <CULL_TYPE value="FRONT" />
+            <DEPTH_MASK value="false" />
+        </state>
         <state name="frontCull">
             <CULL_TYPE value="FRONT"/>
         </state>
@@ -266,6 +288,68 @@
 			</imageTextures>
 		</material>
 		
+		<material name="skyBox">
+			<shader name="skyBox">
+				<values>
+					<valueof uniform   = "CUBEMAP"
+    	                     type      = "TEXTURE_BINDING"
+    	                     context   = "CURRENT"
+    	                     id        = "0"
+    	                     component = "UNIT"
+    	            />
+					<valueof uniform   = "INTEGRATION_UNIT"
+						     type      = "TEXTURE_BINDING"
+						     context   = "CURRENT"
+						     id        = "1"
+						     component = "UNIT"
+				    />
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+					<valueof uniform   = "V"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VIEW"
+                    />
+					<valueof uniform   = "P"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION"
+                    />
+					<valueof uniform   = "CAM_POS"
+							 type      = "CAMERA"
+							 context   = "MainCamera"
+							 component = "POSITION"
+				    />
+					<valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+					<valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+				</values>
+			</shader>
+			<textures>
+				<texture UNIT="0" name="skyBox"/>
+				<texture UNIT="1" name="integrationTex">
+					<MIN_FILTER value="LINEAR"/>
+					<MAG_FILTER value="LINEAR"/>
+				</texture>
+			</textures>
+			<state name="skyBox"/>
+		</material>
+
         <material name="render">
             <shader name="render">
                 <values>
@@ -342,7 +426,10 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
-				<texture UNIT="2" name="integrationTex"/>
+				<texture UNIT="2" name="integrationTex">
+					<MIN_FILTER value="LINEAR"/>
+					<MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
         </material>
     </materials>

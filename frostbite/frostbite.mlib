@@ -383,6 +383,11 @@
                              context   = "Sun"
                              component = "DIRECTION"
                     />
+                    <valueof uniform   = "LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
                     <valueof uniform   = "LIGHT_SPACE_MAT"
                              type      = "CAMERA"
                              context   = "volfx#genShadowMap-LightCam"

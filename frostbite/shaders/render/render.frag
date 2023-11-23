@@ -10,6 +10,8 @@ uniform mat4 V, P;
 uniform float NEAR;
 uniform float FAR;
 
+uniform vec4 LIGHT_COLOR;
+
 
 in Data {
     vec4 projShadowCoord;
@@ -53,9 +55,9 @@ float shadowIlumination(vec3 normal, vec3 lightDir) {
 void main() {
     vec3 normal = normalize(DataIn.normal);
     vec4 diff = texture(TEX_UNIT, DataIn.texCoord);
-    vec4 color = diff * 0.25;
+    vec4 color = diff * LIGHT_COLOR * 0.25;
 
-    color += diff * shadowIlumination(normal,DataIn.lightDir);
+    color += diff * LIGHT_COLOR * shadowIlumination(normal,DataIn.lightDir);
 
     vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, P*V);
     vec4 scatTransmittance = texture(INTEGRATION_UNIT, uvw);

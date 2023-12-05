@@ -1,8 +1,8 @@
 // This file was taken from https://github.com/clayne/opengl-volumetric-lighting/blob/main/src/shaders/common.glsl
 
-#define VOXEL_GRID_SIZE_X 240
-#define VOXEL_GRID_SIZE_Y 135
-#define VOXEL_GRID_SIZE_Z 128
+#define VOXEL_GRID_SIZE_X 160
+#define VOXEL_GRID_SIZE_Y 90
+#define VOXEL_GRID_SIZE_Z 64
 #define BLUE_NOISE_TEXTURE_SIZE 128
 
 // ------------------------------------------------------------------

@@ -9,30 +9,30 @@
 
     <textures>
         <texture name="emissPhaseTex">
-            <WIDTH value="240"/>
-            <HEIGHT value="135"/>
-            <DEPTH value="128"/>
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
          </texture>
 
         <texture name="scatExtinctionTex">
-            <WIDTH value="240"/>
-            <HEIGHT value="135"/>
-            <DEPTH value="128"/>
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
         </texture>
 
         <texture name="scatteringTex">
-            <WIDTH value="240"/>
-            <HEIGHT value="135"/>
-            <DEPTH value="128"/>
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
         </texture>
 
         <texture name="integrationTex">
-            <WIDTH value="240"/>
-            <HEIGHT value="135"/>
-            <DEPTH value="128"/>
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
         </texture>
 

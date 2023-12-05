@@ -2,6 +2,12 @@
 <project name="Frostbite Volumetric Effects" width="1280" height="720">
     <assets>
         <scenes>
+            <scene name="Sphere">
+                <geometry name="Sphere" type="SPHERE" material="sphere">
+                    <SCALE x="0.15" y="0.15" z="0.15"/>
+                </geometry>
+            </scene>
+            <scene name="Bench" filename="..\models\ntg-bench\bench.obj" param="UNITIZE"/>
             <scene name="Sponza" filename="..\models\sponza\sponza.obj" param="UNITIZE"/>
             <scene name="SkyBox">
                 <geometry name="Box" type="BOX" material="skyBox">
@@ -42,7 +48,8 @@
         <pipeline name="volfx" defaultCamera="MainCamera">
             <pass class="depthmap" name="genShadowMap">
                 <scenes>
-                    <scene name="Sponza"/>
+                    <scene name="Bench"/>
+                    <scene name="Sphere"/>
                 </scenes>
                 <camera name="MainCamera"/>
                 <lights>
@@ -68,7 +75,8 @@
 
             <pass class="default" name="Render">
                 <scenes>
-                    <scene name="Sponza"/>
+                    <scene name="Sphere"/>
+                    <scene name="Bench"/>
                     <scene name="SkyBox"/>
                 </scenes>
                 <camera name="MainCamera"/>
@@ -91,9 +99,10 @@
                                 <MAG_FILTER value="NEAREST"/>
                             </texture>
                         </textures>
-                    </map>    
+                    </map>
                 </injectionMaps>
                 <materialMaps>
+                    <map fromMaterial="sphere" toLibrary="Frostbite" toMaterial="sphere"/>
                     <map fromMaterial="skyBox" toLibrary="Frostbite" toMaterial="skyBox"/>
                 </materialMaps>
             </pass>

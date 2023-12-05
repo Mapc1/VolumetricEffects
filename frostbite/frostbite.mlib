@@ -71,20 +71,30 @@
         </shader>
         <shader name="render">
             <vs>
-                <file name="shaders/render/render.vert"/>
+                <file name="shaders/render/default/render.vert"/>
             </vs>
             <ps>
-                <file name="shaders/render/render.frag"/>
+                <file name="shaders/render/default/render.frag"/>
+                <file name="shaders/utils/rand.glsl"/>
+                <file name="shaders/utils/common.glsl"/>
+            </ps>
+        </shader>
+        <shader name="sphere">
+            <vs>
+                <file name="shaders/render/sphere/sphere.vert"/>
+            </vs>
+            <ps>
+                <file name="shaders/render/sphere/sphere.frag"/>
                 <file name="shaders/utils/rand.glsl"/>
                 <file name="shaders/utils/common.glsl"/>
             </ps>
         </shader>
         <shader name="skyBox">
             <vs>
-                <file name="shaders/render/skyBox.vert"/>
+                <file name="shaders/render/skyBox/skyBox.vert"/>
             </vs>
             <ps>
-                <file name="shaders/render/skyBox.frag"/>
+                <file name="shaders/render/skyBox/skyBox.frag"/>
                 <file name="shaders/utils/common.glsl"/>
             </ps>
         </shader>
@@ -348,6 +358,93 @@
                 </texture>
             </textures>
             <state name="skyBox"/>
+        </material>
+        <material name="sphere">
+            <shader name="sphere">
+                <values>
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+                    <valueof uniform   = "V"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VIEW"
+                    />
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                    <valueof uniform   = "P"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION"
+                    />
+                    <valueof uniform   = "NORMAL_MAT"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "NORMAL"
+                    />
+                    <valueof uniform   = "LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "LIGHT_SPACE_MAT"
+                             type      = "CAMERA"
+                             context   = "volfx#genShadowMap-LightCam"
+                             component = "TS05_PVM_MATRIX"
+                    />
+                    <valueof uniform   = "INTEGRATION_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "2"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "TEX_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+                </values>
+            </shader>
+
+            <textures>
+                <texture UNIT="1" name="shadowMap">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture UNIT="2" name="integrationTex">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
         </material>
 
         <material name="render">

@@ -3,12 +3,6 @@
 #define TEX_DIMS ivec3(160,90,64)
 
 #define EMISS vec3(0.0)
-#define SCATTERING vec3(90)
-#define ABSORPTION 0
-#define EXTINCTION 100
-
-// Henyeye-Greenstein G value
-#define G 0.7
 
 #define PI 3.1415926538
 
@@ -29,6 +23,11 @@ uniform vec4 LIGHT_DIR;
 uniform float NEAR;
 uniform float FAR;
 
+// Variable parameters
+uniform float ANISOTROPY;
+uniform vec3 SCATTERING;
+uniform float EXTINCTION;
+
 
 vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
@@ -41,13 +40,13 @@ float camLightAngle(vec4 worldPos) {
 }
 
 
-float henyeyGreenstein(vec4 worldPos) {
+float henyeyGreenstein(vec4 worldPos, float g) {
     vec4 froxelCamDir = normalize(CAM_POS - worldPos);
     vec4 froxelLightDir = normalize(LIGHT_DIR);
 
     float cosAngle = dot(froxelCamDir, froxelLightDir);
-    float denom = 4*PI * pow((1+G*G - 2*G*cosAngle), 3/2);
-    return (1-G*G) / denom;
+    float denom = 4*PI * pow((1+g*g - 2*g*cosAngle), 3/2);
+    return (1-g*g) / denom;
 }
 
 
@@ -55,7 +54,7 @@ void main() {
     ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
     vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
 
-    float phase = henyeyGreenstein(worldPos);
+    float phase = henyeyGreenstein(worldPos, ANISOTROPY);
 
     imageStore(EMISS_PHASE_UNIT, storeLoc, vec4(EMISS,phase));
     imageStore(SCAT_EXTINCTION_UNIT, storeLoc, vec4(SCATTERING,EXTINCTION));

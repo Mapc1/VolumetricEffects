@@ -23,6 +23,10 @@ uniform mat4 LIGHT_SPACE_MAT;
 
 uniform vec4 LIGHT_COLOR;
 
+// Variable params
+uniform float INTENSITY;
+
+
 vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
 
@@ -32,8 +36,8 @@ float sampleShadowMap(vec4 worldPos) {
 }
 
 
-vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor) {
-    return albedo * (phase * inLight * lightColor).rgb;
+vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor, float intensity) {
+    return albedo * intensity * (phase * inLight * lightColor).rgb;
 }
 
 
@@ -53,7 +57,7 @@ void main() {
     vec3 scattering = scatExtinctionFroxel.rgb;
     vec3 albedo = scattering / extinction;
     
-    vec3 lScat = calcScattering(albedo, phase, inLight, LIGHT_COLOR);
+    vec3 lScat = calcScattering(albedo, phase, inLight, LIGHT_COLOR, INTENSITY);
 
     imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction));
 }

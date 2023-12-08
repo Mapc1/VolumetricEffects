@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Frostbite Volumetric Effects" width="1280" height="720">
     <assets>
+        <attributes>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.7"/>
+            <attribute type="STATE" name="SCATTERING" data="VEC3" x="1" y="1" z="1"/>
+            <attribute type="STATE" name="EXTINCTION" data="FLOAT" value="100"/>
+            <attribute type="STATE" name="INTENSITY" data="FLOAT" value="1"/>
+        </attributes>
         <scenes>
             <scene name="Sphere">
                 <geometry name="Sphere" type="SPHERE" material="sphere">
@@ -108,4 +114,13 @@
             </pass>
         </pipeline>
     </pipelines>
+
+    <interface>
+        <window label="settings">
+            <var label="Anisotropy" type="STATE" context="Frostbite::voxelizeMedia" component="ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Scattering" type="STATE" context="Frostbite::voxelizeMedia" component="SCATTERING" def="min=0"/>
+            <var label="Extinction" type="STATE" context="Frostbite::voxelizeMedia" component="EXTINCTION" def="min=0"/>
+            <var label="Intensity" type="STATE" context="Frostbite::calcScattering" component="INTENSITY" def="min=0"/>
+        </window>
+    </interface>
 </project>

@@ -127,6 +127,22 @@
         <material name="voxelizeMedia">
             <shader name="voxelizeMedia">
                 <values>
+                    <valueof uniform="ANISOTROPY"
+                             type="STATE"
+                             context="CURRENT"
+                             component="ANISOTROPY"
+                    />
+                    <valueof uniform="SCATTERING"
+                             type="STATE"
+                             context="CURRENT"
+                             component="SCATTERING"
+                    />
+                    <valueof uniform="EXTINCTION"
+                             type="STATE"
+                             context="CURRENT"
+                             component="EXTINCTION"
+                    />
+
                     <valueof uniform   = "EMISS_PHASE_UNIT"
                              type      = "IMAGE_TEXTURE"
                              context   = "CURRENT"
@@ -186,6 +202,12 @@
         <material name="calcScattering">
             <shader name="calcScattering">
                 <values>
+                    <valueof uniform="INTENSITY"
+                             type="STATE"
+                             context="CURRENT"
+                             component="INTENSITY"
+                    />
+
                     <valueof uniform   = "EMISS_PHASE_UNIT"
                              type      = "TEXTURE_BINDING"
                              context   = "CURRENT"

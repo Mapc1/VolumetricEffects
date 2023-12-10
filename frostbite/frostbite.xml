@@ -3,9 +3,11 @@
     <assets>
         <attributes>
             <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.7"/>
-            <attribute type="STATE" name="SCATTERING" data="VEC3" x="1" y="1" z="1"/>
-            <attribute type="STATE" name="EXTINCTION" data="FLOAT" value="100"/>
-            <attribute type="STATE" name="INTENSITY" data="FLOAT" value="1"/>
+            <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.2" y="0.2" z="0.2" w="0.2"/>
+            <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.3"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="1"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
+            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.1"/>
         </attributes>
         <scenes>
             <scene name="Sphere">
@@ -32,8 +34,8 @@
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
                 <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="0.01" FAR="4.0"/>
-                <POSITION x="0.0" y="0.2" z="0.0"/>
-                <VIEW x="10.0" y="10.0" z="100.0"/>
+                <POSITION x="0.8" y="-0.4" z="-0.6"/>
+                <VIEW x="-0.8" y="0.45" z="0.45"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
         </cameras>
@@ -65,10 +67,6 @@
                 <materialMaps>
                     <map fromMaterial="*" toLibrary="Frostbite" toMaterial="shadowMap"/>
                 </materialMaps>
-            </pass>
-
-            <pass class="compute" name="VoxelizeMedia">
-                <material name="voxelizeMedia" fromLibrary="Frostbite" dimX="160" dimY="90" dimZ="64"/>
             </pass>
 
             <pass class="compute" name="CalcScattering">
@@ -117,10 +115,13 @@
 
     <interface>
         <window label="settings">
-            <var label="Anisotropy" type="STATE" context="Frostbite::voxelizeMedia" component="ANISOTROPY" def="min=0 max=0.999"/>
-            <var label="Scattering" type="STATE" context="Frostbite::voxelizeMedia" component="SCATTERING" def="min=0"/>
-            <var label="Extinction" type="STATE" context="Frostbite::voxelizeMedia" component="EXTINCTION" def="min=0"/>
-            <var label="Intensity" type="STATE" context="Frostbite::calcScattering" component="INTENSITY" def="min=0"/>
+            <var label="Anisotropy" type="STATE" context="Frostbite::calcScattering" component="ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Scattering" type="STATE" context="Frostbite::calcScattering" component="SCATTERING" def="min=0 max=1"/>
+            <var label="Absorption" type="STATE" context="Frostbite::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Density" type="STATE" context="Frostbite::calcScattering" component="DENSITY" def="min=0.001 max=50"/>
+            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=5"/>
+            <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
         </window>
     </interface>
 </project>

@@ -1,6 +1,7 @@
 #version 430
 
 #define TEX_DIMS ivec3(160,90,64)
+#define PI 3.1415926538
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -8,8 +9,6 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 uniform writeonly image3D SCATTERING_UNIT;
 
 // Input textures
-uniform sampler3D EMISS_PHASE_UNIT;
-uniform sampler3D SCAT_EXTINCTION_UNIT;
 uniform sampler2DShadow SHADOW_MAP;
 
 // To get the world position of the froxel
@@ -18,17 +17,43 @@ uniform mat4 INV_PROJ_MAT;
 uniform float NEAR;
 uniform float FAR;
 
+// To get the angle for the phase function
+uniform vec4 CAM_POS;
+uniform vec4 LIGHT_DIR;
+
 // To sample shadow map
 uniform mat4 LIGHT_SPACE_MAT;
 
 uniform vec4 LIGHT_COLOR;
 
 // Variable params
-uniform float INTENSITY;
+uniform float ANISOTROPY;
+uniform vec3 SCATTERING;
+uniform float ABSORPTION;
+uniform float DENSITY;
+uniform float LIGHT_INTENSITY;
+uniform float AMBIENT_LIGHT_STRENGTH;
 
 
 vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
+
+float camLightAngle(vec4 worldPos) {
+    vec4 froxelCamDir = normalize(CAM_POS - worldPos);
+    vec4 froxelLightDir = normalize(-LIGHT_DIR);
+
+    return acos(dot(froxelLightDir, froxelCamDir));
+}
+
+
+float henyeyGreenstein(vec4 worldPos, float g) {
+    vec4 froxelCamDir = normalize(CAM_POS - worldPos);
+    vec4 froxelLightDir = normalize(LIGHT_DIR);
+
+    float cosAngle = dot(froxelCamDir, froxelLightDir);
+    float denom = 4*PI * pow((1+g*g - 2*g*cosAngle), 3/2);
+    return (1-g*g) / denom;
+}
 
 float sampleShadowMap(vec4 worldPos) {
     vec4 projShadowCoord = LIGHT_SPACE_MAT * worldPos;
@@ -36,28 +61,38 @@ float sampleShadowMap(vec4 worldPos) {
 }
 
 
-vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor, float intensity) {
-    return albedo * intensity * (phase * inLight * lightColor).rgb;
+float z_slice_thickness(int z)
+{
+    return exp(-float(TEX_DIMS.z - z - 1) / float(TEX_DIMS.z));
 }
 
+
+vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor, float intensity) {
+    return albedo * intensity * phase * inLight * lightColor.rgb;
+}
+
+
+float mean3(vec3 v) {
+    return (v.x + v.y + v.z) / 3;
+}
 
 void main() {
     ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
     vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+    float thickness = z_slice_thickness(storeLoc.z);
 
-    float inLight = sampleShadowMap(worldPos);
     
-    // Fetch froxels
-    vec4 emissPhaseFroxel = texelFetch(EMISS_PHASE_UNIT, storeLoc, 0);
-    vec4 scatExtinctionFroxel = texelFetch(SCAT_EXTINCTION_UNIT, storeLoc, 0);
-
-    // Split data from froxels for better code readability
-    float phase = emissPhaseFroxel.a;
-    float extinction = scatExtinctionFroxel.a;
-    vec3 scattering = scatExtinctionFroxel.rgb;
+    vec3 scattering = SCATTERING * thickness * DENSITY;
+    float absorption = ABSORPTION * thickness * DENSITY;
+    float extinction = mean3(scattering + absorption);
     vec3 albedo = scattering / extinction;
     
-    vec3 lScat = calcScattering(albedo, phase, inLight, LIGHT_COLOR, INTENSITY);
+    float phase = henyeyGreenstein(worldPos, ANISOTROPY);
+    float inLight = sampleShadowMap(worldPos);
 
-    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction));
+    // Add ambient light so the scene isn't completly dark where there is no in-scattering
+    vec3 lScat = (LIGHT_COLOR.rgb * AMBIENT_LIGHT_STRENGTH); 
+    lScat += calcScattering(albedo, phase, inLight, LIGHT_COLOR, LIGHT_INTENSITY);
+
+    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat*extinction, extinction));
 }

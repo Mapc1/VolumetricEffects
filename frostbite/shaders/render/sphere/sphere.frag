@@ -12,6 +12,7 @@ uniform float FAR;
 
 uniform vec4 LIGHT_COLOR;
 
+uniform float AMBIENT_LIGHT_STRENGTH;
 
 in Data {
     vec4 projShadowCoord;
@@ -54,7 +55,7 @@ float shadowIlumination(vec3 normal, vec3 lightDir) {
 void main() {
     vec3 normal = normalize(DataIn.normal);
     vec4 diff = vec4(0.6,0.0,0.0,1.0);
-    vec4 color = diff * LIGHT_COLOR * 0.25;
+    vec4 color = diff * LIGHT_COLOR * AMBIENT_LIGHT_STRENGTH;
 
     color += diff * LIGHT_COLOR * shadowIlumination(normal,DataIn.lightDir);
 

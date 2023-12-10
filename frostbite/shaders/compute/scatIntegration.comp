@@ -26,6 +26,18 @@ float sliceThickness(int slice) {
 }
 
 
+vec4 accumulateScattering(int z, vec3 accumScattering, float accumTransmittance, vec3 sliceScattering, float sliceExt){
+    float thickness = sliceThickness(z);
+    float sliceTransmittance = exp(-sliceExt*thickness);
+
+    vec3 sliceLightIntegral = sliceScattering * (1.0 - sliceTransmittance) / sliceExt;
+    accumScattering += sliceLightIntegral * accumTransmittance;
+    accumTransmittance *= sliceTransmittance;
+
+    return vec4(accumScattering,accumTransmittance);
+}
+
+
 void main() {
     vec4 accumScattering = vec4(0.0,0.0,0.0,1.0);
     for (int i = 0; i < TEX_DIMS.z; i++) {
@@ -36,10 +48,7 @@ void main() {
         vec3 froxelScattering = scatExtinction.rgb;
         float froxelExtinction = scatExtinction.a;
 
-        float sliceTransimttance = exp(-froxelExtinction*thickness*0.01);
-
-        accumScattering.rgb += froxelScattering * (1.0 - sliceTransimttance);
-        accumScattering.a *= sliceTransimttance;
+        accumScattering = accumulateScattering(i, accumScattering.rgb, accumScattering.a, froxelScattering, froxelExtinction);
 
         imageStore(INTEGRATION_UNIT, storeLoc, accumScattering);
     }

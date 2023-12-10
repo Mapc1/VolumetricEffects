@@ -29,8 +29,8 @@ void main() {
     vec3 inScattering = inScatTransmittance.rgb;
     float transmittance = inScatTransmittance.a;
 
-    vec4 color = texture(CUBEMAP, texCoord);
-    color.rgb = color.rgb + inScattering.rgb;
+    vec3 color = vec3(0);
+    color = inScattering;
 
-    FragColor = color;
+    FragColor = vec4(color,1.0);
 }

@@ -24,13 +24,14 @@ void main() {
     vec3 texCoord = normalize(vec3(DataIn.localPos));
     vec4 worldPos = M * (vec4(texCoord,1.0) + CAM_POS) ;
 
+    vec3 color = texture(CUBEMAP, texCoord).rgb;
+
     vec3 uvw = world_to_uv(worldPos.xyz, NEAR, FAR, 0.0, P*V);
     vec4 inScatTransmittance = texture(INTEGRATION_UNIT, uvw);
     vec3 inScattering = inScatTransmittance.rgb;
     float transmittance = inScatTransmittance.a;
 
-    vec3 color = vec3(0);
-    color = inScattering;
+    color = color * transmittance + inScattering;
 
     FragColor = vec4(color,1.0);
 }

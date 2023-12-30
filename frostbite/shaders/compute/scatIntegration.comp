@@ -13,9 +13,6 @@ uniform sampler3D SCATTERING_UNIT;
 uniform float NEAR;
 uniform float FAR;
 
-vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
-
-
 float sliceDist(int slice) {
     return NEAR * pow(FAR/NEAR, (float(slice)+0.5) / float(TEX_DIMS.z));
 }

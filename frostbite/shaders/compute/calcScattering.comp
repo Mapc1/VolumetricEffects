@@ -33,9 +33,29 @@ uniform float ABSORPTION;
 uniform float DENSITY;
 uniform float LIGHT_INTENSITY;
 uniform float AMBIENT_LIGHT_STRENGTH;
+uniform int NUM_SAMPLES_PER_VOXEL;
 
 
-vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
+vec3 id_to_world_with_jitter(ivec3 id, float jitter, float n, float f, float depth_power, mat4 inv_vp);
+
+uniform float jitter[32] = {
+    0.375, 0.4375,
+    0.625, 0.0625,
+    0.875, 0.1875,
+    0.125, 0.0625,
+    0.375, 0.6875,
+    0.875, 0.4375,
+    0.625, 0.5625,
+    0.375, 0.9375,
+    0.625, 0.3125,
+    0.125, 0.5625,
+    0.125, 0.8125,
+    0.375, 0.1875,
+    0.875, 0.9375,
+    0.875, 0.6875,
+    0.125, 0.3125,
+    0.625, 0.8125
+};
 
 
 float camLightAngle(vec4 worldPos) {
@@ -78,21 +98,28 @@ float mean3(vec3 v) {
 
 void main() {
     ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
-    vec4 worldPos = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
-    float thickness = z_slice_thickness(storeLoc.z);
-
-    
-    vec3 scattering = SCATTERING * thickness * DENSITY;
-    float absorption = ABSORPTION * thickness * DENSITY;
-    float extinction = mean3(scattering + absorption);
-    vec3 albedo = scattering / extinction;
-    
-    float phase = henyeyGreenstein(worldPos, ANISOTROPY);
-    float inLight = sampleShadowMap(worldPos);
 
     // Add ambient light so the scene isn't completly dark where there is no in-scattering
-    vec3 lScat = (LIGHT_COLOR.rgb * AMBIENT_LIGHT_STRENGTH); 
-    lScat += calcScattering(albedo, phase, inLight, LIGHT_COLOR, LIGHT_INTENSITY);
+    vec3 lScat = (LIGHT_COLOR.rgb * AMBIENT_LIGHT_STRENGTH);
+    float extinction = 0;
+
+    for (int i = 0; i < NUM_SAMPLES_PER_VOXEL; i++) {
+        vec4 worldPos = vec4(id_to_world_with_jitter(storeLoc, jitter[i], NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+        float thickness = z_slice_thickness(storeLoc.z);
+    
+        vec3 scattering = SCATTERING * thickness * DENSITY;
+        float absorption = ABSORPTION * thickness * DENSITY;
+        float stepExtinction = mean3(scattering + absorption);
+        extinction += stepExtinction;
+        vec3 albedo = scattering / stepExtinction;
+    
+        float phase = henyeyGreenstein(worldPos, ANISOTROPY);
+        float inLight = sampleShadowMap(worldPos);
+
+        lScat += min(calcScattering(albedo, phase, inLight, LIGHT_COLOR, LIGHT_INTENSITY), 1.0);
+    }
+    lScat /= NUM_SAMPLES_PER_VOXEL;
+    extinction /= NUM_SAMPLES_PER_VOXEL;
 
     imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat*extinction, extinction));
 }

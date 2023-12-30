@@ -39,8 +39,8 @@ float shadowIlumination(vec3 normal, vec3 lightDir) {
     vec2 rand_input_y = gl_FragCoord.yx;
 
     for (int i = 0; i < NUM_SHADOW_SAMPLES; i++) {
-        float x_jitter = rand(rand_input_x) / 4096;
-        float y_jitter = rand(rand_input_y) / 4096;
+        float x_jitter = (rand(rand_input_x) * 2 - 1) / 4096;
+        float y_jitter = (rand(rand_input_y) * 2 - 1) / 4096;
 
         rand_input_x = vec2(x_jitter, y_jitter);
         rand_input_y = vec2(y_jitter, x_jitter);

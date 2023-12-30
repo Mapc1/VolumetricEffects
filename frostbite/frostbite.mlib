@@ -48,7 +48,6 @@
         <shader name="scatIntegration">
             <cs>
                 <file name="shaders/compute/scatIntegration.comp"/>
-                <file name="shaders/utils/common.glsl"/>
             </cs>
         </shader>
         <shader name="render">

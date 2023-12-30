@@ -13,6 +13,7 @@
             <HEIGHT value="90"/>
             <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
         </texture>
 
         <texture name="integrationTex">
@@ -20,6 +21,7 @@
             <HEIGHT value="90"/>
             <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
         </texture>
 
         <cubeMap name="skyBox"
@@ -235,7 +237,10 @@
                 </values>
             </shader>
             <textures>
-                <texture UNIT="0" name="scatteringTex"/>
+                <texture UNIT="0" name="scatteringTex">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
             <imageTextures>
                 <imageTexture UNIT="1" texture="integrationTex">

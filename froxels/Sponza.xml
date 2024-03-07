@@ -31,7 +31,7 @@
                 <viewport name="MainViewport"/>
                 <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="10000.0"/>
                 <POSITION x="900" y="500" z="500"/>
-                <VIEW x="-300" y="300" z="-900"/>
+                <LOOK_AT_POINT x="600" y="800" z="-400"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
         </cameras>

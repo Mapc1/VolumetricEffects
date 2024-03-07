@@ -9,6 +9,7 @@
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.1"/>
             <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
+            <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
         </attributes>
         <scenes>
             <scene name="House" filename="..\models\house\House3.fbx" param="UNITIZE"/>
@@ -115,6 +116,7 @@
             <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
             <var label="Samples per voxel" type="STATE" context="Frostbite::calcScattering" component="NUM_SAMPLES_PER_VOXEL" def="min=1 max=32"/>
+            <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
         </window>
     </interface>
 </project>

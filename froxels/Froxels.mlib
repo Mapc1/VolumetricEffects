@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<materialLib name="Frostbite">
+<materialLib name="Froxels">
     <renderTargets>
         <renderTarget name="shadowMap">
             <SIZE width="8192" height="8192"/>

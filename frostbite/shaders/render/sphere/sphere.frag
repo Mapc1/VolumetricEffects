@@ -13,6 +13,7 @@ uniform float FAR;
 uniform vec4 LIGHT_COLOR;
 
 uniform float AMBIENT_LIGHT_STRENGTH;
+uniform int VOL_ACTIVE;
 
 in Data {
     vec4 projShadowCoord;
@@ -64,7 +65,9 @@ void main() {
     vec3 inScattering = scatTransmittance.rgb;
     float transmittance = scatTransmittance.a;
 
-    color.rgb = color.rgb * transmittance + inScattering;
+    if (VOL_ACTIVE == 0) {
+        color.rgb = color.rgb * transmittance + inScattering;
+    }
 
     FragColor = color;
 }

@@ -2,7 +2,7 @@
 <materialLib name="Frostbite">
     <renderTargets>
         <renderTarget name="shadowMap">
-            <SIZE width="4096" height="4096"/>
+            <SIZE width="8192" height="8192"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
     </renderTargets>
@@ -195,6 +195,11 @@
                              context   = "MainCamera"
                              component = "FAR"
                     />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
                 </values>
             </shader>
             <textures>
@@ -237,6 +242,11 @@
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
+                    />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
                     />
                 </values>
             </shader>
@@ -304,11 +314,19 @@
                              context   = "MainCamera"
                              component = "FAR"
                     />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
                 </values>
             </shader>
             <textures>
                 <texture UNIT="0" name="skyBox"/>
                 <texture UNIT="1" name="integrationTex">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
@@ -392,6 +410,11 @@
                              context   = "MainCamera"
                              component = "FAR"
                     />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
                 </values>
             </shader>
 
@@ -403,6 +426,9 @@
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
                 <texture UNIT="2" name="integrationTex">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
@@ -486,6 +512,11 @@
                              context   = "MainCamera"
                              component = "FAR"
                     />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
                 </values>
             </shader>
 
@@ -497,6 +528,9 @@
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
                 <texture UNIT="2" name="integrationTex">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>

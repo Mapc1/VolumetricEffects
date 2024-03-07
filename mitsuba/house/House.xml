@@ -1,0 +1,150 @@
+<scene version="3.0.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="volpath" id="elm__0" name="elm__0">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+
+	<medium type="homogeneous" id="fog">
+		<rgb name="albedo" value="1, 1, 1"/>
+		<float name="sigma_t" value="0.0012"/>
+		<phase type="hg">
+			<float name="g" value="0.2"/>
+		</phase>
+	</medium>
+
+	<sensor type="perspective">
+		<ref id="fog"/>
+		<transform name="to_world">
+			<lookat origin="-7,-1,-9.5" target="-7,-1,9.5" up="0,1,0" />
+		</transform>
+		<float name="fov" value="60" />
+
+		<sampler type="independent">
+			<integer name="sample_count" value="512" />
+		</sampler>
+
+		<!-- Generate an EXR image at HD resolution -->
+		<film type="hdrfilm">
+			<integer name="width" value="1920" />
+			<integer name="height" value="1080" />
+		</film>
+
+	</sensor>
+
+	<emitter type="directional">
+		<vector name="direction" value="0.4, -0.2, 0"/>
+		<rgb name="irradiance" value="50"/>
+		<ref id="fog"/>
+	</emitter>
+	
+	<shape type="sphere">
+	    <point name="center" x="0" y="0" z="0"/>
+	    <float name="radius" value="20"/>
+		<bsdf type="null"/>
+		<ref name="interior" id="fog"/>
+	</shape>
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Material" name="mat-Material">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Walls.001.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.001" name="mat-Material.001">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Floor.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.002" name="mat-Material.002">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Roof.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Blinders" name="mat-Blinders">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Blinders.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.250000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+
+
+<!-- Shapes -->
+
+	<shape type="ply" id="elm__2" name="elm__2">
+		<string name="filename" value="meshes/Walls.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__4" name="elm__4">
+		<string name="filename" value="meshes/Floor.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.001" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__6" name="elm__6">
+		<string name="filename" value="meshes/Roof.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.002" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__8" name="elm__8">
+		<string name="filename" value="meshes/Blinders.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Blinders" name="bsdf"/>
+	</shape>
+
+<!-- Volumes -->
+
+</scene>

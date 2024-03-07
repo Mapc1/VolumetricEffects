@@ -34,11 +34,12 @@ uniform float DENSITY;
 uniform float LIGHT_INTENSITY;
 uniform float AMBIENT_LIGHT_STRENGTH;
 uniform int NUM_SAMPLES_PER_VOXEL;
+uniform int VOL_ACTIVE;
 
 
 vec3 id_to_world_with_jitter(ivec3 id, float jitter, float n, float f, float depth_power, mat4 inv_vp);
 
-uniform float jitter[32] = {
+float jitter[32] = {
     0.375, 0.4375,
     0.625, 0.0625,
     0.875, 0.1875,
@@ -80,6 +81,34 @@ float sampleShadowMap(vec4 worldPos) {
     return textureProj(SHADOW_MAP, projShadowCoord / projShadowCoord.w);
 }
 
+bool sdfCube(vec4 worldPos, vec4 center, float lengthX, float lengthY, float lengthZ) {
+    float halfLenX = lengthX / 2;
+    float halfLenY = lengthY / 2;
+    float halfLenZ = lengthZ / 2;
+
+    return worldPos.x <= halfLenX+center.x && worldPos.x >= -halfLenX+center.x &&
+           worldPos.y <= halfLenY+center.y && worldPos.y >= -halfLenY+center.y &&
+           worldPos.z <= halfLenZ+center.z && worldPos.z >= -halfLenZ+center.z;
+}
+
+bool sdfSphere(vec4 worldPos, vec4 center, float radius) {
+    float dist = length(worldPos - center);
+
+    return dist < radius;
+}
+
+bool homogeneousMedia() {
+    return true;
+}
+
+bool sampleMedia(vec4 worldPos){
+    return homogeneousMedia();//sdfCube(worldPos, vec4(0,500.0,0.0,1.0), 500.0, 800.0, 500.0) || sdfSphere(worldPos, vec4(0.0,2000.0,0.0,1.0), 500.0);
+}
+
+float shadowCalc(vec4 worldPos, float extinction) {
+    return sampleShadowMap(worldPos);
+}
+
 
 float z_slice_thickness(int z)
 {
@@ -87,8 +116,8 @@ float z_slice_thickness(int z)
 }
 
 
-vec3 calcScattering(vec3 albedo, float phase, float inLight, vec4 lightColor, float intensity) {
-    return albedo * intensity * phase * inLight * lightColor.rgb;
+vec3 calcScattering(vec3 scattering, float phase, float inLight, vec4 lightColor, float intensity) {
+    return scattering * intensity * phase * inLight * lightColor.rgb;
 }
 
 
@@ -97,29 +126,37 @@ float mean3(vec3 v) {
 }
 
 void main() {
+    if (VOL_ACTIVE == 1) {
+        return;
+    }
+
     ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
 
-    // Add ambient light so the scene isn't completly dark where there is no in-scattering
-    vec3 lScat = (LIGHT_COLOR.rgb * AMBIENT_LIGHT_STRENGTH);
-    float extinction = 0;
+    vec3 lScat = vec3(0);
+    vec3  avgScattering = vec3(0);
+    float avgAbsorption = 0;
+    float avgExtinction = 0;
+    float avgPhase = 0;
+    float avgShadow = 0;
 
     for (int i = 0; i < NUM_SAMPLES_PER_VOXEL; i++) {
         vec4 worldPos = vec4(id_to_world_with_jitter(storeLoc, jitter[i], NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
         float thickness = z_slice_thickness(storeLoc.z);
     
-        vec3 scattering = SCATTERING * thickness * DENSITY;
-        float absorption = ABSORPTION * thickness * DENSITY;
-        float stepExtinction = mean3(scattering + absorption);
-        extinction += stepExtinction;
-        vec3 albedo = scattering / stepExtinction;
+        float density = sampleMedia(worldPos) ? DENSITY : 0.00001;
+        avgScattering += SCATTERING * density;
+        avgAbsorption += ABSORPTION * density;
     
-        float phase = henyeyGreenstein(worldPos, ANISOTROPY);
-        float inLight = sampleShadowMap(worldPos);
-
-        lScat += min(calcScattering(albedo, phase, inLight, LIGHT_COLOR, LIGHT_INTENSITY), 1.0);
+        avgPhase  += henyeyGreenstein(worldPos, ANISOTROPY);
+        avgShadow += sampleShadowMap(worldPos);
     }
-    lScat /= NUM_SAMPLES_PER_VOXEL;
-    extinction /= NUM_SAMPLES_PER_VOXEL;
+    avgScattering /= NUM_SAMPLES_PER_VOXEL;
+    avgAbsorption /= NUM_SAMPLES_PER_VOXEL;
+    avgPhase /= NUM_SAMPLES_PER_VOXEL;
+    avgShadow /= NUM_SAMPLES_PER_VOXEL;
 
-    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat*extinction, extinction));
+    avgExtinction = mean3(avgScattering) + avgAbsorption;
+
+    lScat = calcScattering(avgScattering, avgPhase, avgShadow, LIGHT_COLOR, LIGHT_INTENSITY);
+    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, avgExtinction));
 }

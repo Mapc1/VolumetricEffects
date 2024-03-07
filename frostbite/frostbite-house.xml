@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Volumetric Effects - Froxels" width="1280" height="720">
+    <assets>
+        <attributes>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.2"/>
+            <attribute type="STATE" name="SCATTERING" data="VEC4" x="1.0" y="1.0" z="1.0" w="1.0"/>
+            <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.12"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
+            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.1"/>
+            <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
+        </attributes>
+        <scenes>
+            <scene name="House" filename="..\models\house\House3.fbx" param="UNITIZE"/>
+            <scene name="SkyBox">
+                <geometry name="Box" type="BOX" material="skyBox">
+                    <SCALE x="2" y="2" z="2"/>
+                </geometry>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="MainViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+            </viewport>
+        </viewports>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="0.01" FAR="4.0"/>
+                <POSITION x="-0.7" y="-0.1" z="-0.65"/>
+                <VIEW x="0" y="0" z="1"/>
+                <UP x="0.0" y="1.0" z="0.0"/>
+            </camera>
+        </cameras>
+
+        <lights>
+            <light name="Sun">
+                <DIRECTION x="0.4" y="-0.2" z="0"/>
+                <COLOR r="1.0" g="1.0" b="1.0"/>
+            </light>
+        </lights>
+
+        <materialLibs>
+            <materialLib filename="frostbite.mlib"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="volfx" defaultCamera="MainCamera">
+            <pass class="depthmap" name="genShadowMap">
+                <scenes>
+                    <scene name="House"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+                <renderTarget name="shadowMap" fromLibrary="Frostbite"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Frostbite" toMaterial="shadowMap"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="compute" name="CalcScattering">
+                <material name="calcScattering" fromLibrary="Frostbite" dimX="160" dimY="90" dimZ="64"/>
+            </pass>
+
+            <pass class="compute" name="ScatIntegration">
+                <material name="scatIntegration" fromLibrary="Frostbite" dimX="160" dimY="90" dimZ="1"/>
+            </pass>
+
+            <pass class="default" name="Render">
+                <scenes>
+                    <scene name="House"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="render" fromLibrary="Frostbite" />
+                        <textures>
+                            <texture name="integrationTex" fromLibrary="Frostbite" toUnit="2">
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="shadowMap" fromLibrary="Frostbite" toUnit="1">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="NEAREST"/>
+                                <MAG_FILTER value="NEAREST"/>
+                            </texture>
+                        </textures>
+                    </map>
+                </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skyBox" toLibrary="Frostbite" toMaterial="skyBox"/>
+                </materialMaps>
+            </pass>
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="settings">
+            <var label="Anisotropy" type="STATE" context="Frostbite::calcScattering" component="ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Scattering" type="STATE" context="Frostbite::calcScattering" component="SCATTERING" def="min=0 max=1"/>
+            <var label="Absorption" type="STATE" context="Frostbite::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Density" type="STATE" context="Frostbite::calcScattering" component="DENSITY" def="min=0.001 max=50"/>
+            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
+            <var label="Samples per voxel" type="STATE" context="Frostbite::calcScattering" component="NUM_SAMPLES_PER_VOXEL" def="min=1 max=32"/>
+        </window>
+    </interface>
+</project>

@@ -13,6 +13,7 @@ uniform float FAR;
 uniform vec4 LIGHT_COLOR;
 
 uniform float AMBIENT_LIGHT_STRENGTH;
+uniform int VOL_ACTIVE;
 
 
 in Data {
@@ -27,6 +28,7 @@ in Data {
 out vec4 FragColor;
 
 float rand(vec2 co);
+vec4 textureTricubic(sampler3D tex, vec3 coord);
 vec3 world_to_uv(vec3 world_pos, float n, float f, float depth_power, mat4 vp);
 
 float shadowIlumination(vec3 normal, vec3 lightDir) {
@@ -62,11 +64,15 @@ void main() {
     color += diff * LIGHT_COLOR * shadowIlumination(normal,DataIn.lightDir);
 
     vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, P*V);
-    vec4 scatTransmittance = texture(INTEGRATION_UNIT, uvw);
+    uvw.z = min(uvw.z,1.0);
+
+    vec4 scatTransmittance = textureTricubic(INTEGRATION_UNIT, uvw);
     vec3 inScattering = scatTransmittance.rgb;
     float transmittance = scatTransmittance.a;
 
-    color.rgb = color.rgb * transmittance + inScattering;
+    if (VOL_ACTIVE == 0) {
+        color.rgb = color.rgb * transmittance + inScattering;
+    }
 
     FragColor = color;
 }

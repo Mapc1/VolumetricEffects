@@ -13,6 +13,8 @@ uniform sampler3D SCATTERING_UNIT;
 uniform float NEAR;
 uniform float FAR;
 
+uniform int VOL_ACTIVE;
+
 float sliceDist(int slice) {
     return NEAR * pow(FAR/NEAR, (float(slice)+0.5) / float(TEX_DIMS.z));
 }
@@ -36,6 +38,10 @@ vec4 accumulateScattering(int z, vec3 accumScattering, float accumTransmittance,
 
 
 void main() {
+    if (VOL_ACTIVE == 1) {
+        return;
+    }
+    
     vec4 accumScattering = vec4(0.0,0.0,0.0,1.0);
     for (int i = 0; i < TEX_DIMS.z; i++) {
         ivec3 storeLoc = ivec3(gl_GlobalInvocationID.xy, i);

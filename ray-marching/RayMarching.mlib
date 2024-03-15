@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<materialLib name="RayMarching">
+    <renderTargets>
+        <renderTarget name="gBuffer">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="normal" internalFormat="RGBA"/>
+                <color name="position" internalFormat="RGBA32F"/>
+                <color name="albedo" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+        
+        <renderTarget name="shadowMap">
+            <SIZE width="8192" height="8192"/>
+            <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+    </renderTargets>
+
+    <shaders>
+        <shader name="shadowMap"
+                  vs="shaders/shadow_map/shadowMap.vert"
+                  ps="shaders/shadow_map/shadowMap.frag"
+        />
+        <shader name="gBuffer"
+                  vs="shaders/gBuffer/gBuffer.vert"
+                  ps="shaders/gBuffer/gBuffer.frag"
+        />
+        <shader name="render"
+                  vs="shaders/render/render.vert"
+                  ps="shaders/render/render.frag"
+        />
+        <shader name="normals"
+                  vs="shaders/debug/normals/normals.vert"
+                  ps="shaders/debug/normals/normals.frag"
+        />
+        <shader name="positions"
+                  vs="shaders/debug/positions/positions.vert"
+                  ps="shaders/debug/positions/positions.frag"
+        />
+        <shader name="albedos"
+                  vs="shaders/debug/albedos/albedos.vert"
+                  ps="shaders/debug/albedos/albedos.frag"
+        />
+    </shaders>
+
+    <materials>
+        <material name="shadowMap">
+            <shader name="shadowMap">
+                <values>
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+                </values>
+            </shader>
+        </material>
+
+        <material name="gBuffer">
+            <shader name="gBuffer">
+                <values>
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />  
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                    <valueof uniform   = "TEX_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                    <valueof 
+                             uniform   = "NORMAL_MAT"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "NORMAL"
+                    />
+                </values>
+            </shader>
+        </material>
+
+        <material name="render">
+            <shader name="render">
+                <values>
+                    <valueof uniform   = "NORMAL"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                    <valueof uniform   = "POSITION"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "1"
+                    />
+                    <valueof uniform   = "ALBEDO"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "2"
+                    />
+                    <valueof uniform   = "SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "3"
+                    />
+                    
+                    <valueof uniform   = "LIGHT_DIR"
+                             type      = "LIGHT" 
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "LIGHT_SPACE_MAT"
+                             type      = "CAMERA"
+                             context   = "ray-marching#genShadowMap-LightCam"
+                             component = "TS05_PVM_MATRIX"
+                    />
+					<valueof uniform   = "V" 
+							 type      = "CAMERA" 
+                             context   = "MainCamera" 
+							 component = "VIEW_MATRIX"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="normal"    UNIT="0"/>
+                <texture name="position"  UNIT="1"/>
+                <texture name="albedo"    UNIT="2"/>
+                <texture name="shadowMap" UNIT="3">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+        </material>
+
+        <material name="normals">
+            <shader name="normals">
+                <values>
+                    <valueof uniform   = "NORMAL"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="normal" UNIT="0"/> 
+            </textures>
+        </material>
+
+        <material name="positions">
+            <shader name="positions">
+                <values>
+                    <valueof uniform   = "POSITION"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="position" UNIT="0"/> 
+            </textures>
+        </material>
+
+        <material name="albedos">
+            <shader name="albedos">
+                <values>
+                    <valueof uniform   = "ALBEDO"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="albedo" UNIT="0"/> 
+            </textures>
+        </material>
+    </materials>
+</materialLib>

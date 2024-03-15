@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Volumetric Effects - Ray-marching" width="1280" height="720">
+    <assets>
+        <scenes>
+            <scene name="Sponza" filename="..\models\sponza\sponza.obj"/>
+            <scene name="SkyBox">
+                <geometry name="Box" type="BOX" material="skyBox">
+                    <SCALE x="5000" y="5000" z="5000"/>
+                </geometry>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="MainViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+            </viewport>
+        </viewports>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="10000.0"/>
+                <POSITION x="900" y="500" z="500"/>
+                <LOOK_AT_POINT x="600" y="800" z="-400"/>
+                <UP x="0.0" y="1.0" z="0.0"/>
+            </camera>
+        </cameras>
+
+        <lights>
+            <light name="Sun">
+                <DIRECTION x="0.5" y="-0.7" z="0.4"/>
+                <COLOR r="1.0" g="1.0" b="1.0"/>
+            </light>
+        </lights> 
+
+        <materialLibs>
+            <materialLib filename="RayMarching.mlib"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="ray-marching" defaultCamera="MainCamera">
+            <pass class="depthmap" name="genShadowMap">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>      
+                <renderTarget name="shadowMap" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="shadowMap"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="render">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <camera name="MainCamera"/>
+                <material name="render" fromLibrary="RayMarching"/>
+            </pass>
+        </pipeline>
+
+        <pipeline name="Normals">
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="normals">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="normals" fromLibrary="RayMarching"/>
+            </pass> 
+        </pipeline>
+
+        <pipeline name="Positions">
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="positions">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="positions" fromLibrary="RayMarching"/>
+            </pass> 
+        </pipeline>
+
+        <pipeline name="Albedos">
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="albedos">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="albedos" fromLibrary="RayMarching"/>
+            </pass> 
+        </pipeline>
+    </pipelines>
+    
+    <interface>
+        <window label="settings" >
+            <pipelineList label="Pipeline" />
+        </window>
+    </interface>
+</project>

@@ -9,6 +9,7 @@ uniform float FAR;
 uniform vec4 CAM_POS;
 
 uniform int VOL_ACTIVE;
+uniform float GAMMA = 2.2;
 
 in Data {
     vec4 localPos;
@@ -26,7 +27,7 @@ void main() {
     vec3 texCoord = normalize(vec3(DataIn.localPos));
     vec4 worldPos = M * (vec4(texCoord,1.0) + CAM_POS) ;
 
-    vec3 color = texture(CUBEMAP, texCoord).rgb;
+    vec3 color = vec3(0); // texture(CUBEMAP, texCoord).rgb;
 
     vec3 uvw = world_to_uv(worldPos.xyz, NEAR, FAR, 0.0, P*V);
     vec4 inScatTransmittance = texture(INTEGRATION_UNIT, vec3(uvw.xy,1.0));
@@ -37,5 +38,7 @@ void main() {
         color = color * transmittance + inScattering;
     }
 
+    color = color / (color + vec3(1.0));
+    color = pow(color, vec3(1.0 / GAMMA));
     FragColor = vec4(color,1.0);
 }

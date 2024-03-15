@@ -7,7 +7,7 @@
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
             <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.0003"/>
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
-            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.1"/>
+            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
         </attributes>
@@ -15,7 +15,7 @@
             <scene name="Sponza" filename="..\models\sponza\sponza.obj"/>
             <scene name="SkyBox">
                 <geometry name="Box" type="BOX" material="skyBox">
-                    <SCALE x="5000" y="5000" z="5000"/>
+                    <SCALE x="4000" y="4000" z="4000"/>
                 </geometry>
             </scene>
         </scenes>
@@ -29,7 +29,7 @@
         <cameras>
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
-                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="10000.0"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="7000.0"/>
                 <POSITION x="900" y="500" z="500"/>
                 <LOOK_AT_POINT x="600" y="800" z="-400"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
@@ -44,7 +44,7 @@
         </lights>
 
         <materialLibs>
-            <materialLib filename="froxels.mlib"/>
+            <materialLib filename="Froxels.mlib"/>
         </materialLibs>
     </assets>
 
@@ -65,7 +65,7 @@
             </pass>
 
             <pass class="compute" name="CalcScattering">
-                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="64"/>
+                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="128"/>
             </pass>
 
             <pass class="compute" name="ScatIntegration">
@@ -113,7 +113,7 @@
             <var label="Absorption" type="STATE" context="Froxels::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
             <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=0.1"/>
             <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
-            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=10"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
             <var label="Samples per voxel" type="STATE" context="Froxels::calcScattering" component="NUM_SAMPLES_PER_VOXEL" def="min=1 max=32"/>
             <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>

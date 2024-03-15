@@ -11,7 +11,7 @@
         <texture name="scatteringTex">
             <WIDTH value="160"/>
             <HEIGHT value="90"/>
-            <DEPTH value="64"/>
+            <DEPTH value="128"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
             <MIPMAP value="true"/>
         </texture>
@@ -19,7 +19,7 @@
         <texture name="integrationTex">
             <WIDTH value="160"/>
             <HEIGHT value="90"/>
-            <DEPTH value="64"/>
+            <DEPTH value="128"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
             <MIPMAP value="true"/>
         </texture>
@@ -102,7 +102,6 @@
                     />
                 </values>
             </shader>
-            <state name="frontCull"/>
         </material>
 
         <material name="calcScattering">

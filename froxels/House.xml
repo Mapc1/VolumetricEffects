@@ -5,18 +5,18 @@
             <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.2"/>
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="1.0" y="1.0" z="1.0" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0"/>
-            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.12"/>
-            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
-            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.1"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.0003"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="10"/>
+            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
         </attributes>
         
         <scenes>
-            <scene name="House" filename="..\models\house\House3.fbx" param="UNITIZE"/>
+            <scene name="House" filename="..\models\house\House.obj"/>
             <scene name="SkyBox">
                 <geometry name="Box" type="BOX" material="skyBox">
-                    <SCALE x="2" y="2" z="2"/>
+                    <SCALE x="20" y="20" z="20"/>
                 </geometry>
             </scene>
         </scenes>
@@ -30,9 +30,9 @@
         <cameras>
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
-                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="0.01" FAR="4.0"/>
-                <POSITION x="-0.7" y="-0.1" z="-0.65"/>
-                <VIEW x="0" y="0" z="1"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="0.01" FAR="40.0"/>
+                <POSITION x="-7" y="-1" z="-9.5"/>
+                <LOOK_AT_POINT x="-7" y="-1" z="9.5"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
         </cameras>
@@ -45,7 +45,7 @@
         </lights>
 
         <materialLibs>
-            <materialLib filename="froxels.mlib"/>
+            <materialLib filename="Froxels.mlib"/>
         </materialLibs>
     </assets>
 
@@ -66,7 +66,7 @@
             </pass>
 
             <pass class="compute" name="CalcScattering">
-                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="64"/>
+                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="128"/>
             </pass>
 
             <pass class="compute" name="ScatIntegration">
@@ -112,7 +112,7 @@
             <var label="Anisotropy" type="STATE" context="Froxels::calcScattering" component="ANISOTROPY" def="min=0 max=0.999"/>
             <var label="Scattering" type="STATE" context="Froxels::calcScattering" component="SCATTERING" def="min=0 max=1"/>
             <var label="Absorption" type="STATE" context="Froxels::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
-            <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=50"/>
+            <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=0.1"/>
             <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
             <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>

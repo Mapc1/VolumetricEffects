@@ -26,12 +26,14 @@ float sliceThickness(int slice) {
 
 
 vec4 accumulateScattering(int z, vec3 accumScattering, float accumTransmittance, vec3 sliceScattering, float sliceExt){
-    float thickness = sliceThickness(z);
-    float sliceTransmittance = exp(-sliceExt*thickness);
+    if (sliceExt != 0.0) {
+        float thickness = sliceThickness(z);
+        float sliceTransmittance = exp(-sliceExt*thickness);
 
-    vec3 sliceLightIntegral = sliceScattering * (1.0 - sliceTransmittance) / sliceExt;
-    accumScattering += sliceLightIntegral * accumTransmittance;
-    accumTransmittance *= sliceTransmittance;
+        vec3 sliceLightIntegral = sliceScattering * (1.0 - sliceTransmittance) / sliceExt;
+        accumScattering += sliceLightIntegral * accumTransmittance;
+        accumTransmittance *= sliceTransmittance;
+    }
 
     return vec4(accumScattering,accumTransmittance);
 }

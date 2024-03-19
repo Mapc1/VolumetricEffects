@@ -9,6 +9,7 @@
                 <color name="position" internalFormat="RGBA32F"/>
                 <color name="albedo" internalFormat="RGBA"/>
             </colors>
+            <depth name="depth" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
         
         <renderTarget name="shadowMap">
@@ -41,6 +42,10 @@
         <shader name="albedos"
                   vs="shaders/debug/albedos/albedos.vert"
                   ps="shaders/debug/albedos/albedos.frag"
+        />
+        <shader name="linearDepth"
+                  vs="shaders/debug/linearDepth/linearDepth.vert"
+                  ps="shaders/debug/linearDepth/linearDepth.frag"
         />
     </shaders>
 
@@ -187,6 +192,21 @@
             </shader>
             <textures>
                 <texture name="albedo" UNIT="0"/> 
+            </textures>
+        </material>
+
+        <material name="linearDepth">
+            <shader name="linearDepth">
+                <values>
+                    <valueof uniform   = "DEPTH"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="depth" UNIT="0"/> 
             </textures>
         </material>
     </materials>

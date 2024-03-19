@@ -19,7 +19,7 @@
         <cameras>
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
-                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="10000.0"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="7000.0"/>
                 <POSITION x="900" y="500" z="500"/>
                 <LOOK_AT_POINT x="600" y="800" z="-400"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
@@ -143,6 +143,29 @@
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
                 <material name="albedos" fromLibrary="RayMarching"/>
+            </pass> 
+        </pipeline>
+
+        <pipeline name="LinearDepth">
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="linearDepth">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="linearDepth" fromLibrary="RayMarching"/>
             </pass> 
         </pipeline>
     </pipelines>

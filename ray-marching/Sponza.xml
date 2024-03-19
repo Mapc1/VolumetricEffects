@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Volumetric Effects - Ray-marching" width="1280" height="720">
     <assets>
+        <attributes>
+            <attribute type="STATE" name="NUM_STEPS" data="INT" value="64"/>
+        </attributes>
+
         <scenes>
             <scene name="Sponza" filename="..\models\sponza\sponza.obj"/>
             <scene name="SkyBox">
@@ -31,7 +35,7 @@
                 <DIRECTION x="0.5" y="-0.7" z="0.4"/>
                 <COLOR r="1.0" g="1.0" b="1.0"/>
             </light>
-        </lights> 
+        </lights>
 
         <materialLibs>
             <materialLib filename="RayMarching.mlib"/>
@@ -47,7 +51,7 @@
                 <camera name="MainCamera"/>
                 <lights>
                     <light name="Sun"/>
-                </lights>      
+                </lights>
                 <renderTarget name="shadowMap" fromLibrary="RayMarching"/>
                 <materialMaps>
                     <map fromMaterial="*" toLibrary="RayMarching" toMaterial="shadowMap"/>
@@ -97,7 +101,7 @@
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
                 <material name="normals" fromLibrary="RayMarching"/>
-            </pass> 
+            </pass>
         </pipeline>
 
         <pipeline name="Positions">
@@ -120,7 +124,7 @@
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
                 <material name="positions" fromLibrary="RayMarching"/>
-            </pass> 
+            </pass>
         </pipeline>
 
         <pipeline name="Albedos">
@@ -143,7 +147,7 @@
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
                 <material name="albedos" fromLibrary="RayMarching"/>
-            </pass> 
+            </pass>
         </pipeline>
 
         <pipeline name="LinearDepth">
@@ -166,13 +170,37 @@
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
                 <material name="linearDepth" fromLibrary="RayMarching"/>
-            </pass> 
+            </pass>
+        </pipeline>
+
+        <pipeline name="Scattering">
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="scatIntegration">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="scatIntegration" fromLibrary="RayMarching"/>
+            </pass>
         </pipeline>
     </pipelines>
-    
+
     <interface>
-        <window label="settings" >
+        <window label="Settings" >
             <pipelineList label="Pipeline" />
+            <var label="Number of ray-marching steps" type="STATE" context="RayMarching::scatIntegration" component="NUM_STEPS" def="min=1"/>
         </window>
     </interface>
 </project>

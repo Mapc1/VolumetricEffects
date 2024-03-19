@@ -11,7 +11,7 @@
             </colors>
             <depth name="depth" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
-        
+
         <renderTarget name="shadowMap">
             <SIZE width="8192" height="8192"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
@@ -26,6 +26,10 @@
         <shader name="gBuffer"
                   vs="shaders/gBuffer/gBuffer.vert"
                   ps="shaders/gBuffer/gBuffer.frag"
+        />
+        <shader name="scatIntegration"
+                  vs="shaders/scatIntegration/scatIntegration.vert"
+                  ps="shaders/scatIntegration/scatIntegration.frag"
         />
         <shader name="render"
                   vs="shaders/render/render.vert"
@@ -69,7 +73,7 @@
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "PROJECTION_VIEW_MODEL"
-                    />  
+                    />
                     <valueof uniform   = "M"
                              type      = "RENDERER"
                              context   = "CURRENT"
@@ -81,7 +85,7 @@
                              component = "UNIT"
                              id        = "0"
                     />
-                    <valueof 
+                    <valueof
                              uniform   = "NORMAL_MAT"
                              type      = "RENDERER"
                              context   = "CURRENT"
@@ -89,6 +93,55 @@
                     />
                 </values>
             </shader>
+        </material>
+
+        <material name="scatIntegration">
+            <shader name="scatIntegration">
+                <values>
+                    <valueof uniform   = "NUM_STEPS"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "NUM_STEPS"
+                    />
+
+                    <valueof uniform   = "POSITION"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                    <valueof uniform   = "DEPTH"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "1"
+                    />
+                    <valueof uniform   = "SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "2"
+                    />
+
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "CURRENT"
+                             component = "POSITION"
+                    />
+					<valueof uniform   = "V"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+							 component = "VIEW_MATRIX"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="position" UNIT="0"/>
+                <texture name="depth" UNIT="1"/>
+                <texture name="shadowMap" UNIT="2">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
         </material>
 
         <material name="render">
@@ -114,9 +167,9 @@
                              component = "UNIT"
                              id        = "3"
                     />
-                    
+
                     <valueof uniform   = "LIGHT_DIR"
-                             type      = "LIGHT" 
+                             type      = "LIGHT"
                              context   = "Sun"
                              component = "DIRECTION"
                     />
@@ -130,9 +183,9 @@
                              context   = "ray-marching#genShadowMap-LightCam"
                              component = "TS05_PVM_MATRIX"
                     />
-					<valueof uniform   = "V" 
-							 type      = "CAMERA" 
-                             context   = "MainCamera" 
+					<valueof uniform   = "V"
+							 type      = "CAMERA"
+                             context   = "MainCamera"
 							 component = "VIEW_MATRIX"
                     />
                 </values>
@@ -150,6 +203,8 @@
             </textures>
         </material>
 
+        <!-- DEBUG materials -->
+
         <material name="normals">
             <shader name="normals">
                 <values>
@@ -161,7 +216,7 @@
                 </values>
             </shader>
             <textures>
-                <texture name="normal" UNIT="0"/> 
+                <texture name="normal" UNIT="0"/>
             </textures>
         </material>
 
@@ -176,7 +231,7 @@
                 </values>
             </shader>
             <textures>
-                <texture name="position" UNIT="0"/> 
+                <texture name="position" UNIT="0"/>
             </textures>
         </material>
 
@@ -191,7 +246,7 @@
                 </values>
             </shader>
             <textures>
-                <texture name="albedo" UNIT="0"/> 
+                <texture name="albedo" UNIT="0"/>
             </textures>
         </material>
 
@@ -206,7 +261,7 @@
                 </values>
             </shader>
             <textures>
-                <texture name="depth" UNIT="0"/> 
+                <texture name="depth" UNIT="0"/>
             </textures>
         </material>
     </materials>

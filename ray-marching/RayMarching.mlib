@@ -12,6 +12,15 @@
             <depth name="depth" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
 
+        <renderTarget name="scatTrans">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="scattering" internalFormat="RGBA32F"/>
+                <color name="transmittance" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+
         <renderTarget name="shadowMap">
             <SIZE width="8192" height="8192"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
@@ -103,6 +112,36 @@
                              context   = "CURRENT"
                              component = "NUM_STEPS"
                     />
+                    <valueof uniform   = "ANISOTROPY"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "ANISOTROPY"
+                    />
+                    <valueof uniform   = "SCATTERING"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "SCATTERING"
+                    />
+                    <valueof uniform   = "ABSORPTION"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "ABSORPTION"
+                    />
+                    <valueof uniform   = "DENSITY"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "DENSITY"
+                    />
+                    <valueof uniform   = "LIGHT_INTENSITY"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "LIGHT_INTENSITY"
+                    />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
 
                     <valueof uniform   = "POSITION"
                              type      = "TEXTURE_BINDING"
@@ -122,13 +161,68 @@
 
                     <valueof uniform   = "CAM_POS"
                              type      = "CAMERA"
-                             context   = "CURRENT"
+                             context   = "MainCamera"
                              component = "POSITION"
+                    />
+                    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+                    <valueof uniform   = "LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "LIGHT_SPACE_MAT"
+                             type      = "CAMERA"
+                             context   = "ray-marching#genShadowMap-LightCam"
+                             component = "TS05_PVM_MATRIX"
                     />
 					<valueof uniform   = "V"
                              type      = "CAMERA"
                              context   = "MainCamera"
 							 component = "VIEW_MATRIX"
+                    />
+                    <valueof uniform   = "RATIO"
+                             type      = "VIEWPORT"
+                             context   = "MainViewport"
+                             component = "ABSOLUTE_RATIO"
+                    />
+                    <valueof uniform   = "WINDOW_SIZE"
+                             type      = "VIEWPORT"
+                             context   = "MainViewport"
+                             component = "ABSOLUTE_SIZE"
+                    />
+                    <valueof uniform   = "FOV"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FOV"
+                    />
+                    <valueof uniform   = "CAM_VIEW"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NORMALIZED_VIEW"
+                    />
+                    <valueof uniform   = "CAM_RIGHT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NORMALIZED_RIGHT"
+                    />
+                    <valueof uniform   = "CAM_UP"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NORMALIZED_UP"
                     />
                 </values>
             </shader>
@@ -147,6 +241,17 @@
         <material name="render">
             <shader name="render">
                 <values>
+                    <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "AMBIENT_LIGHT_STRENGTH"
+                    />
+                    <valueof uniform   = "GAMMA"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "GAMMA"
+                    />
+
                     <valueof uniform   = "NORMAL"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
@@ -162,10 +267,20 @@
                              component = "UNIT"
                              id        = "2"
                     />
-                    <valueof uniform   = "SHADOW_MAP"
+                    <valueof uniform   = "SCATTERING"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "3"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "4"
+                    />
+                    <valueof uniform   = "SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "5"
                     />
 
                     <valueof uniform   = "LIGHT_DIR"
@@ -191,10 +306,12 @@
                 </values>
             </shader>
             <textures>
-                <texture name="normal"    UNIT="0"/>
-                <texture name="position"  UNIT="1"/>
-                <texture name="albedo"    UNIT="2"/>
-                <texture name="shadowMap" UNIT="3">
+                <texture name="normal"     UNIT="0"/>
+                <texture name="position"   UNIT="1"/>
+                <texture name="albedo"     UNIT="2"/>
+                <texture name="scattering" UNIT="3"/>
+                <texture name="transmittance" UNIT="4"/>
+                <texture name="shadowMap"  UNIT="5">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>
                     <MIN_FILTER value="LINEAR"/>

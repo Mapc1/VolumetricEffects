@@ -6,9 +6,11 @@ uniform mat4 LIGHT_SPACE_MAT;
 uniform sampler2D POSITION;
 uniform sampler2D NORMAL;
 uniform sampler2D ALBEDO;
+uniform sampler2D SCATTERING;
+uniform sampler2D TRANSMITTANCE;
 uniform sampler2DShadow SHADOW_MAP;
 
-uniform float AMBIENT_LIGHT_STRENGTH = 0.1; 
+uniform float AMBIENT_LIGHT_STRENGTH = 0.1;
 uniform int NUM_SHADOW_SAMPLES = 64;
 uniform float GAMMA = 2.2;
 
@@ -20,7 +22,7 @@ in Data {
 out vec4 FragColor;
 
 float shadowIlumination(vec3 normal, vec3 lightDir, vec4 proj_shadow_coord) {
-    // If the surface is facing away from the light we don't add any illumination    
+    // If the surface is facing away from the light we don't add any illumination
     float n_dot_l = max(0.0, dot(normal, lightDir));
     if (n_dot_l <= 0.01) {
         return 0.0;
@@ -34,7 +36,7 @@ float shadowIlumination(vec3 normal, vec3 lightDir, vec4 proj_shadow_coord) {
     for (int x = -1; x < 1; x++) {
         for (int y = -1; y < 1; y++) {
             vec4 offset = vec4(vec2(x,y) * texel_size, 0, 0);
-            shadow += textureProj(SHADOW_MAP, proj_coord_with_bias + offset); 
+            shadow += textureProj(SHADOW_MAP, proj_coord_with_bias + offset);
         }
     }
 
@@ -48,7 +50,7 @@ vec4 toneMap(vec4 color, float gamma) {
 
 void main() {
     vec3 normal = texture(NORMAL, Inputs.texCoord).xyz;
-    if (normal == vec3(0.0)) 
+    if (normal == vec3(0.0))
         discard;
 
     normal = normalize(normal * 2 - 1);
@@ -58,9 +60,14 @@ void main() {
 
     vec4 proj_shadow_coord = LIGHT_SPACE_MAT * world_position;
 
-    float luminance = shadowIlumination(normal, light_dir, proj_shadow_coord); 
+    float luminance = shadowIlumination(normal, light_dir, proj_shadow_coord);
     vec4 color = albedo * LIGHT_COLOR * AMBIENT_LIGHT_STRENGTH;
     color += albedo * LIGHT_COLOR * luminance;
-    
+
+    vec3 scattering = texture(SCATTERING, Inputs.texCoord).rgb;
+    float transmittance = texture(TRANSMITTANCE, Inputs.texCoord).r;
+
+    color.rgb = color.rgb * transmittance + scattering;
+
     FragColor = toneMap(color, GAMMA);
 }

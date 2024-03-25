@@ -3,6 +3,14 @@
     <assets>
         <attributes>
             <attribute type="STATE" name="NUM_STEPS" data="INT" value="64"/>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.2"/>
+            <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
+            <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.0003"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
+            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
+            <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
+            <attribute type="RENDERER" name="GAMMA" data="FLOAT" value="2.2"/>
         </attributes>
 
         <scenes>
@@ -73,6 +81,14 @@
                 <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
             </pass>
 
+            <pass class="quad" name="scatIntegration">
+                <COLOR_CLEAR value="false" />
+                <camera name="MainCamera"/>
+                <viewport name="MainViewport"/>
+                <material name="scatIntegration" fromLibrary="RayMarching"/>
+                <renderTarget name="scatTrans" fromLibrary="RayMarching"/>
+            </pass>
+
             <pass class="quad" name="render">
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
@@ -80,6 +96,45 @@
                 <material name="render" fromLibrary="RayMarching"/>
             </pass>
         </pipeline>
+
+        <pipeline name="Scattering">
+            <pass class="depthmap" name="genShadowMap">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+                <renderTarget name="shadowMap" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="shadowMap"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="scatIntegration">
+                <COLOR_CLEAR value="false" />
+                <camera name="MainCamera"/>
+                <viewport name="MainViewport"/>
+                <material name="scatIntegration" fromLibrary="RayMarching"/>
+            </pass>
+        </pipeline>
+
 
         <pipeline name="Normals">
             <pass class="default" name="gBuffer">
@@ -172,35 +227,21 @@
                 <material name="linearDepth" fromLibrary="RayMarching"/>
             </pass>
         </pipeline>
-
-        <pipeline name="Scattering">
-            <pass class="default" name="gBuffer">
-                <viewport name="MainViewport"/>
-                <scenes>
-                    <scene name="Sponza"/>
-                    <scene name="SkyBox"/>
-                </scenes>
-                <camera name="MainCamera"/>
-                <injectionMaps>
-                    <map toMaterial="*">
-                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
-                    </map>
-                </injectionMaps>
-                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
-            </pass>
-
-            <pass class="quad" name="scatIntegration">
-                <COLOR_CLEAR value="false" />
-                <viewport name="MainViewport"/>
-                <material name="scatIntegration" fromLibrary="RayMarching"/>
-            </pass>
-        </pipeline>
     </pipelines>
 
     <interface>
         <window label="Settings" >
             <pipelineList label="Pipeline" />
-            <var label="Number of ray-marching steps" type="STATE" context="RayMarching::scatIntegration" component="NUM_STEPS" def="min=1"/>
+            <var label="Ray-marching steps" type="STATE" context="RayMarching::scatIntegration" component="NUM_STEPS" def="min=1 max=5000"/>
+            <var label="Anisotropy" type="STATE" context="RayMarching::scatIntegration" component="ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Scattering" type="STATE" context="RayMarching::scatIntegration" component="SCATTERING" def="min=0 max=1"/>
+            <var label="Absorption" type="STATE" context="RayMarching::scatIntegration" component="ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Density" type="STATE" context="RayMarching::scatIntegration" component="DENSITY" def="min=0.001 max=0.1"/>
+            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
+            <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
+            <var label="Gamma" type="RENDERER" context="CURRENT" component="GAMMA" def="min=0 max=4"/>
         </window>
     </interface>
 </project>

@@ -7,6 +7,7 @@
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
             <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.0003"/>
+            <attribute type="STATE" name="SKYBOX_FAR_DIV" data="INT" value="3"/>
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
@@ -16,8 +17,8 @@
         <scenes>
             <scene name="Sponza" filename="..\models\sponza\sponza.obj"/>
             <scene name="SkyBox">
-                <geometry name="Box" type="BOX" material="skyBox">
-                    <SCALE x="5000" y="5000" z="5000"/>
+                <geometry name="Box" type="BOX" material="skybox">
+                    <SCALE x="-4000" y="-4000" z="-4000"/>
                 </geometry>
             </scene>
         </scenes>
@@ -78,6 +79,9 @@
                         <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
                     </map>
                 </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skybox" toLibrary="RayMarching" toMaterial="skybox_gBuffer"/>
+                </materialMaps>
                 <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
             </pass>
 
@@ -97,45 +101,8 @@
             </pass>
         </pipeline>
 
-        <pipeline name="Scattering">
-            <pass class="depthmap" name="genShadowMap">
-                <scenes>
-                    <scene name="Sponza"/>
-                </scenes>
-                <camera name="MainCamera"/>
-                <lights>
-                    <light name="Sun"/>
-                </lights>
-                <renderTarget name="shadowMap" fromLibrary="RayMarching"/>
-                <materialMaps>
-                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="shadowMap"/>
-                </materialMaps>
-            </pass>
 
-            <pass class="default" name="gBuffer">
-                <viewport name="MainViewport"/>
-                <scenes>
-                    <scene name="Sponza"/>
-                    <scene name="SkyBox"/>
-                </scenes>
-                <camera name="MainCamera"/>
-                <injectionMaps>
-                    <map toMaterial="*">
-                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
-                    </map>
-                </injectionMaps>
-                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
-            </pass>
-
-            <pass class="quad" name="scatIntegration">
-                <COLOR_CLEAR value="false" />
-                <camera name="MainCamera"/>
-                <viewport name="MainViewport"/>
-                <material name="scatIntegration" fromLibrary="RayMarching"/>
-            </pass>
-        </pipeline>
-
-
+        <!-- Debug pipelines -->
         <pipeline name="Normals">
             <pass class="default" name="gBuffer">
                 <viewport name="MainViewport"/>
@@ -149,6 +116,9 @@
                         <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
                     </map>
                 </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skybox" toLibrary="RayMarching" toMaterial="skybox_gBuffer"/>
+                </materialMaps>
                 <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
             </pass>
 
@@ -172,6 +142,9 @@
                         <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
                     </map>
                 </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skybox" toLibrary="RayMarching" toMaterial="skybox_gBuffer"/>
+                </materialMaps>
                 <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
             </pass>
 
@@ -195,6 +168,9 @@
                         <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
                     </map>
                 </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skybox" toLibrary="RayMarching" toMaterial="skybox_gBuffer"/>
+                </materialMaps>
                 <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
             </pass>
 
@@ -202,29 +178,6 @@
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
                 <material name="albedos" fromLibrary="RayMarching"/>
-            </pass>
-        </pipeline>
-
-        <pipeline name="LinearDepth">
-            <pass class="default" name="gBuffer">
-                <viewport name="MainViewport"/>
-                <scenes>
-                    <scene name="Sponza"/>
-                    <scene name="SkyBox"/>
-                </scenes>
-                <camera name="MainCamera"/>
-                <injectionMaps>
-                    <map toMaterial="*">
-                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
-                    </map>
-                </injectionMaps>
-                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
-            </pass>
-
-            <pass class="quad" name="linearDepth">
-                <COLOR_CLEAR value="false" />
-                <viewport name="MainViewport"/>
-                <material name="linearDepth" fromLibrary="RayMarching"/>
             </pass>
         </pipeline>
     </pipelines>
@@ -237,6 +190,7 @@
             <var label="Scattering" type="STATE" context="RayMarching::scatIntegration" component="SCATTERING" def="min=0 max=1"/>
             <var label="Absorption" type="STATE" context="RayMarching::scatIntegration" component="ABSORPTION" def="min=0.001 max=1"/>
             <var label="Density" type="STATE" context="RayMarching::scatIntegration" component="DENSITY" def="min=0.001 max=0.1"/>
+            <var label="Skybox far division" type="STATE" context="RayMarching::skybox_gBuffer" component="SKYBOX_FAR_DIV" def="min=1 max=10"/>
             <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
             <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>

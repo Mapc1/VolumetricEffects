@@ -10,8 +10,8 @@ out vec4 FragColor;
 
 void main() {
     vec3 position = texture(POSITION, Inputs.texCoord).xyz;
-    if (position == vec3(0.0)) 
+    if (position == vec3(0.0))
         discard;
-    
+
     FragColor = vec4(position, 1.0);
 }

@@ -49,12 +49,11 @@ vec4 toneMap(vec4 color, float gamma) {
 }
 
 void main() {
-    vec3 normal = texture(NORMAL, Inputs.texCoord).xyz;
-    if (normal == vec3(0.0))
+    vec4 world_position = texture(POSITION, Inputs.texCoord);
+    if (world_position == vec4(0.0))
         discard;
 
-    normal = normalize(normal * 2 - 1);
-    vec4 world_position = texture(POSITION, Inputs.texCoord);
+    vec3 normal = normalize(texture(NORMAL, Inputs.texCoord).xyz * 2 - 1);
     vec4 albedo = texture(ALBEDO, Inputs.texCoord);
     vec3 light_dir = normalize(Inputs.lightDir);
 

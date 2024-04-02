@@ -8,8 +8,8 @@
                 <color name="normal" internalFormat="RGBA"/>
                 <color name="position" internalFormat="RGBA32F"/>
                 <color name="albedo" internalFormat="RGBA"/>
+                <color name="skyboxFlag" internalFormat="RGBA"/>
             </colors>
-            <depth name="depth" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
 
         <renderTarget name="scatTrans">
@@ -36,6 +36,10 @@
                   vs="shaders/gBuffer/gBuffer.vert"
                   ps="shaders/gBuffer/gBuffer.frag"
         />
+        <shader name="skybox_gBuffer"
+                  vs="shaders/skybox_gBuffer/skybox_gBuffer.vert"
+                  ps="shaders/skybox_gBuffer/skybox_gBuffer.frag"
+        />
         <shader name="scatIntegration"
                   vs="shaders/scatIntegration/scatIntegration.vert"
                   ps="shaders/scatIntegration/scatIntegration.frag"
@@ -55,10 +59,6 @@
         <shader name="albedos"
                   vs="shaders/debug/albedos/albedos.vert"
                   ps="shaders/debug/albedos/albedos.frag"
-        />
-        <shader name="linearDepth"
-                  vs="shaders/debug/linearDepth/linearDepth.vert"
-                  ps="shaders/debug/linearDepth/linearDepth.frag"
         />
     </shaders>
 
@@ -99,6 +99,34 @@
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "NORMAL"
+                    />
+                </values>
+            </shader>
+        </material>
+
+        <material name="skybox_gBuffer">
+            <shader name="skybox_gBuffer">
+                <values>
+                    <valueof uniform   = "SKYBOX_FAR_DIV"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "SKYBOX_FAR_DIV"
+                    />
+
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
                     />
                 </values>
             </shader>
@@ -148,15 +176,10 @@
                              component = "UNIT"
                              id        = "0"
                     />
-                    <valueof uniform   = "DEPTH"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "1"
-                    />
                     <valueof uniform   = "SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
-                             id        = "2"
+                             id        = "1"
                     />
 
                     <valueof uniform   = "CAM_POS"
@@ -194,42 +217,11 @@
                              context   = "MainCamera"
 							 component = "VIEW_MATRIX"
                     />
-                    <valueof uniform   = "RATIO"
-                             type      = "VIEWPORT"
-                             context   = "MainViewport"
-                             component = "ABSOLUTE_RATIO"
-                    />
-                    <valueof uniform   = "WINDOW_SIZE"
-                             type      = "VIEWPORT"
-                             context   = "MainViewport"
-                             component = "ABSOLUTE_SIZE"
-                    />
-                    <valueof uniform   = "FOV"
-                             type      = "CAMERA"
-                             context   = "MainCamera"
-                             component = "FOV"
-                    />
-                    <valueof uniform   = "CAM_VIEW"
-                             type      = "CAMERA"
-                             context   = "MainCamera"
-                             component = "NORMALIZED_VIEW"
-                    />
-                    <valueof uniform   = "CAM_RIGHT"
-                             type      = "CAMERA"
-                             context   = "MainCamera"
-                             component = "NORMALIZED_RIGHT"
-                    />
-                    <valueof uniform   = "CAM_UP"
-                             type      = "CAMERA"
-                             context   = "MainCamera"
-                             component = "NORMALIZED_UP"
-                    />
                 </values>
             </shader>
             <textures>
                 <texture name="position" UNIT="0"/>
-                <texture name="depth" UNIT="1"/>
-                <texture name="shadowMap" UNIT="2">
+                <texture name="shadowMap" UNIT="1">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>
                     <MIN_FILTER value="LINEAR"/>
@@ -364,21 +356,6 @@
             </shader>
             <textures>
                 <texture name="albedo" UNIT="0"/>
-            </textures>
-        </material>
-
-        <material name="linearDepth">
-            <shader name="linearDepth">
-                <values>
-                    <valueof uniform   = "DEPTH"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "0"
-                    />
-                </values>
-            </shader>
-            <textures>
-                <texture name="depth" UNIT="0"/>
             </textures>
         </material>
     </materials>

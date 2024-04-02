@@ -14,11 +14,6 @@ uniform mat4 LIGHT_SPACE_MAT;
 uniform vec4 LIGHT_DIR;
 uniform vec4 LIGHT_COLOR;
 
-uniform vec2 WINDOW_SIZE = vec2(1280,720);
-uniform float RATIO;
-uniform float FOV = 60.0;
-uniform vec4 CAM_VIEW, CAM_UP, CAM_RIGHT;
-
 uniform int NUM_STEPS = 64;
 
 // Variable params
@@ -80,22 +75,12 @@ vec4 toneMap(vec4 color, float gamma) {
     return pow(tone_mapped, vec4(1.0 / gamma));
 }
 
-vec3 getRayDir(vec2 fragCoord) {
-  vec3 ray_dir;
+float calcDepth(int stepNum) {
+    // Exponential depth
+    return NEAR * pow(FAR/NEAR, (float(stepNum)+0.5) / float(NUM_STEPS));
 
-  float focal_length = 1.0 / tan(radians(FOV*0.5)); // Distance from camera to pixel plane
-
-  ray_dir.xy = (2.0*fragCoord/WINDOW_SIZE) - 1.0;
-  ray_dir.x *= RATIO;
-  ray_dir.z = -focal_length;
-  ray_dir = normalize(ray_dir);
-  ray_dir = mat3(
-    vec3(CAM_RIGHT),
-    vec3(CAM_UP),
-    vec3(-CAM_VIEW)
-  ) * ray_dir;
-
-  return ray_dir;
+   // Linear depth
+   //return ((FAR -NEAR)/NUM_STEPS) * stepNum;
 }
 
 void main() {
@@ -108,47 +93,43 @@ void main() {
     vec2 tex_coord = Inputs.texCoord;
 
     vec4 world_pos = texture(POSITION, tex_coord);
-    if (world_pos == vec4(0.0)) {
-        discard;
-    }
-
-    float depth = texture(DEPTH, tex_coord).r;
-    float linear_depth = linearizeDepth(depth, NEAR, FAR);
-
     if (world_pos == vec4(0.0))
-        linear_depth = FAR;
+        discard;
+
+    vec4 view_pos = V * world_pos;
+    view_pos /= view_pos.w;
+    float linear_depth = abs(view_pos.z);
 
     vec3 ray_dir = normalize(world_pos - CAM_POS).xyz;
-    vec4 stride = vec4(ray_dir * ((FAR - NEAR) / NUM_STEPS), 0.0);
 
     vec3 tmp_accum_scattering = vec3(0.0);
     float tmp_accum_transmittance = 1.0;
 
     float cur_depth = 0.0;
-    float max_dist = 0.0;
-    vec4 cur_world_pos = CAM_POS + stride;
-    float stride_len = length(stride);
-    float cur_len = 0.0;
+    int cur_step = 1;
+    vec4 cur_world_pos = CAM_POS + vec4(ray_dir,0.0)*calcDepth(cur_step);
     while (cur_depth < linear_depth && cur_depth < FAR) {
         float density = DENSITY;
         vec3 scattering = SCATTERING * density;
         float absorption = ABSORPTION * density;
         float extinction = mean3(scattering) + absorption;
+        float stride = calcDepth(cur_step) - cur_depth;
 
         float phase = henyeyGreenstein(cur_world_pos, CAM_POS, LIGHT_DIR, ANISOTROPY);
         vec4 proj_coord = LIGHT_SPACE_MAT * cur_world_pos;
-        float shadow = sampleShadowMap(+proj_coord);
+        float shadow = sampleShadowMap(proj_coord);
 
         vec3 in_scattering = calcScattering(scattering, phase, shadow, LIGHT_COLOR, LIGHT_INTENSITY);
 
-        vec4 lol = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride_len);
-        tmp_accum_scattering = lol.rgb;
-        tmp_accum_transmittance = lol.a;
+        vec4 scatTrans = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride);
+        tmp_accum_scattering = scatTrans.rgb;
+        tmp_accum_transmittance = scatTrans.a;
 
-        cur_world_pos += stride;
+        cur_world_pos += vec4(ray_dir * stride,0.0);
         vec4 cur_view_pos = V * cur_world_pos;
         cur_view_pos /= cur_view_pos.w;
         cur_depth = abs(cur_view_pos.z);
+        cur_step++;
     }
 
     accum_scattering = vec4(tmp_accum_scattering,1.0);

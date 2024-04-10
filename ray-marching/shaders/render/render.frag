@@ -58,7 +58,7 @@ float shadowIlumination(vec3 normal, vec3 lightDir, vec4 proj_shadow_coord) {
 float pointLightShadowIlumination(vec3 normal, vec4 worldPos, vec4 lightPos) {
     vec3 frag_light_dir = (worldPos - lightPos).xyz;
     vec4 view_frag_light_dir = V * vec4(frag_light_dir,0.0);
-    float n_dot_l = max(0.0, dot(normalize(normal), normalize(view_frag_light_dir.xyz)));
+    float n_dot_l = max(0.0, -dot(normalize(normal), normalize(view_frag_light_dir.xyz)));
     if (n_dot_l <= 0.01)
         return 0.0;
 

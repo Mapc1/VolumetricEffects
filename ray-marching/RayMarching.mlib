@@ -22,8 +22,17 @@
         </renderTarget>
 
         <renderTarget name="shadowMap">
-            <SIZE width="8192" height="8192"/>
+            <SIZE width="4096" height="4096"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap1">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap1" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
     </renderTargets>
 
@@ -31,6 +40,11 @@
         <shader name="shadowMap"
                   vs="shaders/shadow_map/shadowMap.vert"
                   ps="shaders/shadow_map/shadowMap.frag"
+        />
+        <shader name="pointLightShadowMap"
+                  vs="shaders/pointLightShadowMap/pointLightShadowMap.vert"
+                  gs="shaders/pointLightShadowMap/pointLightShadowMap.geom"
+                  ps="shaders/pointLightShadowMap/pointLightShadowMap.frag"
         />
         <shader name="gBuffer"
                   vs="shaders/gBuffer/gBuffer.vert"
@@ -61,6 +75,11 @@
                   ps="shaders/debug/albedos/albedos.frag"
         />
     </shaders>
+    <states>
+        <state name="shadow">
+            <CULL_TYPE value="FRONT"/>
+        </state>
+    </states>
 
     <materials>
         <material name="shadowMap">
@@ -73,11 +92,46 @@
                     />
                 </values>
             </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight1"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
         </material>
 
         <material name="gBuffer">
             <shader name="gBuffer">
                 <values>
+                    <!-- Renderer props -->
                     <valueof uniform   = "PVM"
                              type      = "RENDERER"
                              context   = "CURRENT"
@@ -88,17 +142,19 @@
                              context   = "CURRENT"
                              component = "MODEL"
                     />
-                    <valueof uniform   = "TEX_UNIT"
-                             type      = "TEXTURE_BINDING"
-                             context   = "CURRENT"
-                             component = "UNIT"
-                             id        = "0"
-                    />
                     <valueof
                              uniform   = "NORMAL_MAT"
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "NORMAL"
+                    />
+
+                    <!-- Other props -->
+                    <valueof uniform   = "TEX_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             component = "UNIT"
+                             id        = "0"
                     />
                 </values>
             </shader>
@@ -107,17 +163,14 @@
         <material name="skybox_gBuffer">
             <shader name="skybox_gBuffer">
                 <values>
+                    <!-- Settings props -->
                     <valueof uniform   = "SKYBOX_FAR_DIV"
                              type      = "STATE"
                              context   = "CURRENT"
                              component = "SKYBOX_FAR_DIV"
                     />
 
-                    <valueof uniform   = "PVM"
-                             type      = "RENDERER"
-                             context   = "CURRENT"
-                             component = "PROJECTION_VIEW_MODEL"
-                    />
+                    <!-- Camera props -->
                     <valueof uniform   = "CAM_POS"
                              type      = "CAMERA"
                              context   = "MainCamera"
@@ -128,6 +181,13 @@
                              context   = "MainCamera"
                              component = "FAR"
                     />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
                 </values>
             </shader>
         </material>
@@ -135,6 +195,7 @@
         <material name="scatIntegration">
             <shader name="scatIntegration">
                 <values>
+                    <!-- Settings props -->
                     <valueof uniform   = "NUM_STEPS"
                              type      = "STATE"
                              context   = "CURRENT"
@@ -171,17 +232,53 @@
                              component = "VOL_ACTIVE"
                     />
 
+                    <!-- GBuffer -->
                     <valueof uniform   = "POSITION"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "0"
                     />
-                    <valueof uniform   = "SHADOW_MAP"
+
+                    <!-- Directional light props -->
+                    <valueof uniform   = "DIRECT_LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "1"
                     />
+                    <valueof uniform   = "DIRECT_LIGHT_SPACE_MAT"
+                             type      = "CAMERA"
+                             context   = "ray-marching#genShadowMap-LightCam"
+                             component = "TS05_PVM_MATRIX"
+                    />
 
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "POINT_LIGHT_1_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight1"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_1_COLOR"
+                             type      = "LIGHT"
+                             context   = "PointLight1"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_1_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "2"
+                    />
+
+                    <!-- Camera props -->
                     <valueof uniform   = "CAM_POS"
                              type      = "CAMERA"
                              context   = "MainCamera"
@@ -196,21 +293,6 @@
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
-                    />
-                    <valueof uniform   = "LIGHT_DIR"
-                             type      = "LIGHT"
-                             context   = "Sun"
-                             component = "DIRECTION"
-                    />
-                    <valueof uniform   = "LIGHT_COLOR"
-                             type      = "LIGHT"
-                             context   = "Sun"
-                             component = "COLOR"
-                    />
-                    <valueof uniform   = "LIGHT_SPACE_MAT"
-                             type      = "CAMERA"
-                             context   = "ray-marching#genShadowMap-LightCam"
-                             component = "TS05_PVM_MATRIX"
                     />
 					<valueof uniform   = "V"
                              type      = "CAMERA"
@@ -227,12 +309,19 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
+                <texture name="pointLightShadowMap1" UNIT="2">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
         </material>
 
         <material name="render">
             <shader name="render">
                 <values>
+                    <!-- Settings props -->
                     <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
                              type      = "LIGHT"
                              context   = "Sun"
@@ -244,6 +333,7 @@
                              component = "GAMMA"
                     />
 
+                    <!-- GBuffer -->
                     <valueof uniform   = "NORMAL"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
@@ -259,41 +349,73 @@
                              component = "UNIT"
                              id        = "2"
                     />
-                    <valueof uniform   = "SCATTERING"
+                    <valueof uniform   = "SKYBOX_FLAG"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "3"
                     />
-                    <valueof uniform   = "TRANSMITTANCE"
+
+                    <!-- Integrated scattering and transmittance -->
+                    <valueof uniform   = "SCATTERING"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "4"
                     />
-                    <valueof uniform   = "SHADOW_MAP"
+                    <valueof uniform   = "TRANSMITTANCE"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "5"
                     />
 
-                    <valueof uniform   = "LIGHT_DIR"
-                             type      = "LIGHT"
-                             context   = "Sun"
-                             component = "DIRECTION"
-                    />
-                    <valueof uniform   = "LIGHT_COLOR"
-                             type      = "LIGHT"
-                             context   = "Sun"
-                             component = "COLOR"
-                    />
-                    <valueof uniform   = "LIGHT_SPACE_MAT"
+                    <!-- Directional light props -->
+                    <valueof uniform   = "DIRECT_LIGHT_SPACE_MAT"
                              type      = "CAMERA"
                              context   = "ray-marching#genShadowMap-LightCam"
                              component = "TS05_PVM_MATRIX"
                     />
+                    <valueof uniform   = "DIRECT_LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "6"
+                    />
+
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "POINT_LIGHT_1_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight1"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_1_COLOR"
+                             type      = "LIGHT"
+                             context   = "PointLight1"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_1_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "7"
+                    />
+
+                    <!-- Other props -->
 					<valueof uniform   = "V"
-							 type      = "CAMERA"
+                             type      = "CAMERA"
                              context   = "MainCamera"
-							 component = "VIEW_MATRIX"
+                             component = "VIEW_MATRIX"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
                     />
                 </values>
             </shader>
@@ -301,9 +423,16 @@
                 <texture name="normal"     UNIT="0"/>
                 <texture name="position"   UNIT="1"/>
                 <texture name="albedo"     UNIT="2"/>
-                <texture name="scattering" UNIT="3"/>
-                <texture name="transmittance" UNIT="4"/>
-                <texture name="shadowMap"  UNIT="5">
+                <texture name="skyboxFlag" UNIT="3"/>
+                <texture name="scattering" UNIT="4"/>
+                <texture name="transmittance" UNIT="5"/>
+                <texture name="shadowMap"  UNIT="6">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap1" UNIT="7">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>
                     <MIN_FILTER value="LINEAR"/>

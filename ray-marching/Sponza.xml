@@ -27,6 +27,10 @@
             <viewport name="MainViewport">
                 <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
             </viewport>
+            <viewport name="CM_Viewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+                <SIZE width="1024" height="1024"/>
+            </viewport>
         </viewports>
 
         <cameras>
@@ -37,12 +41,27 @@
                 <LOOK_AT_POINT x="600" y="800" z="-400"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
-        </cameras>
+
+            <!-- Cubemap camera -->
+            <camera name="CM_FOV_90">
+                <viewport name="CM_Viewport" />
+                <POSITION x="0" y="0" z="0.0" />
+                <VIEW x="1.0" y="0.0" z="0.0" />
+                <NEAR value = "1.0" />
+                <FAR value="7000.0"/>
+                <FOV value = "90" />
+                <UP x="0" y="-1" z="0" />
+                </camera>
+            </cameras>
 
         <lights>
             <light name="Sun">
                 <DIRECTION x="0.5" y="-0.7" z="0.4"/>
                 <COLOR r="1.0" g="1.0" b="1.0"/>
+            </light>
+            <light name="PointLight1">
+                <COLOR r="0.6" g="0.1" b="0.1"/>
+                <POSITION x="0.0" y="500.0" z="0.0"/>
             </light>
         </lights>
 
@@ -64,6 +83,16 @@
                 <renderTarget name="shadowMap" fromLibrary="RayMarching"/>
                 <materialMaps>
                     <map fromMaterial="*" toLibrary="RayMarching" toMaterial="shadowMap"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLighShadowMap">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap1" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap"/>
                 </materialMaps>
             </pass>
 

@@ -19,6 +19,6 @@ void main() {
     Outputs.texCoord = texCoord0;
 
     Outputs.position /= Outputs.position.w;
-    
+
     gl_Position = PVM * position;
 }

@@ -2,20 +2,6 @@
 
 #define PI 3.1415926538
 
-uniform sampler2D POSITION;
-uniform sampler2D DEPTH;
-uniform sampler2DShadow SHADOW_MAP;
-
-uniform vec4 CAM_POS;
-uniform float NEAR;
-uniform float FAR;
-uniform mat4 V;
-uniform mat4 LIGHT_SPACE_MAT;
-uniform vec4 LIGHT_DIR;
-uniform vec4 LIGHT_COLOR;
-
-uniform int NUM_STEPS = 64;
-
 // Variable params
 uniform float ANISOTROPY;
 uniform vec3 SCATTERING;
@@ -23,6 +9,30 @@ uniform float ABSORPTION;
 uniform float DENSITY;
 uniform float LIGHT_INTENSITY;
 uniform int VOL_ACTIVE;
+uniform int NUM_STEPS = 64;
+
+// GBuffer
+uniform sampler2D POSITION;
+
+// Directional light props
+uniform vec4 DIRECT_LIGHT_DIR;
+uniform vec4 DIRECT_LIGHT_COLOR;
+uniform sampler2DShadow DIRECT_LIGHT_SHADOW_MAP;
+uniform mat4 DIRECT_LIGHT_SPACE_MAT;
+
+// Point light 1 props
+uniform vec4 POINT_LIGHT_1_COLOR;
+uniform vec4 POINT_LIGHT_1_POS;
+uniform samplerCube POINT_LIGHT_1_SHADOW_MAP;
+
+// Camera props
+uniform vec4 CAM_POS;
+uniform float NEAR;
+uniform float FAR;
+
+// Renderer props
+uniform mat4 V;
+
 
 in Data {
     vec2 texCoord;
@@ -41,8 +51,21 @@ float henyeyGreenstein(vec4 world_pos, vec4 cam_pos, vec4 light_dir, float g) {
     return (1-g*g) / denom;
 }
 
+float pointLightShadowIlumination(vec4 worldPos, vec4 lightPos) {
+    vec3 frag_light_dir = (worldPos - lightPos).xyz;
+    float currentDepth = length(frag_light_dir);
+
+    float closestDepth = texture(POINT_LIGHT_1_SHADOW_MAP, frag_light_dir).r;
+    closestDepth *= FAR;
+
+    float bias = 0;
+    float shadow = currentDepth - bias <= closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
+
 float sampleShadowMap(vec4 projShadowCoord) {
-    return textureProj(SHADOW_MAP, projShadowCoord);
+    return textureProj(DIRECT_LIGHT_SHADOW_MAP, projShadowCoord);
 }
 
 float mean3(vec3 v) {
@@ -77,10 +100,10 @@ vec4 toneMap(vec4 color, float gamma) {
 
 float calcDepth(int stepNum) {
     // Exponential depth
-    return NEAR * pow(FAR/NEAR, (float(stepNum)+0.5) / float(NUM_STEPS));
+    //return NEAR * pow(FAR/NEAR, (float(stepNum)+0.5) / float(NUM_STEPS));
 
    // Linear depth
-   //return ((FAR -NEAR)/NUM_STEPS) * stepNum;
+   return ((FAR -NEAR)/NUM_STEPS) * stepNum;
 }
 
 void main() {
@@ -115,11 +138,16 @@ void main() {
         float extinction = mean3(scattering) + absorption;
         float stride = calcDepth(cur_step) - cur_depth;
 
-        float phase = henyeyGreenstein(cur_world_pos, CAM_POS, LIGHT_DIR, ANISOTROPY);
-        vec4 proj_coord = LIGHT_SPACE_MAT * cur_world_pos;
+        float phase = henyeyGreenstein(cur_world_pos, CAM_POS, DIRECT_LIGHT_DIR, ANISOTROPY);
+        vec4 proj_coord = DIRECT_LIGHT_SPACE_MAT * cur_world_pos;
         float shadow = sampleShadowMap(proj_coord);
 
-        vec3 in_scattering = calcScattering(scattering, phase, shadow, LIGHT_COLOR, LIGHT_INTENSITY);
+        vec3 in_scattering = calcScattering(scattering, phase, shadow, DIRECT_LIGHT_COLOR, LIGHT_INTENSITY);
+
+        vec4 world_light_dir = cur_world_pos-POINT_LIGHT_1_POS;
+        shadow = pointLightShadowIlumination(cur_world_pos, POINT_LIGHT_1_POS);
+        phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
+        in_scattering += calcScattering(scattering, phase, shadow, POINT_LIGHT_1_COLOR, LIGHT_INTENSITY);
 
         vec4 scatTrans = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride);
         tmp_accum_scattering = scatTrans.rgb;

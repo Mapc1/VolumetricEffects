@@ -1,5 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <materialLib name="RayMarching">
+    <buffers>
+        <buffer name="positions">
+            <DIM x="2" y="1" z="1"/>
+            <structure>
+                <field value="VEC4"/>
+            </structure>
+        </buffer>
+        <buffer name="colors">
+            <DIM x="2" y="1" z="1"/>
+            <structure>
+                <field value="VEC4"/>
+            </structure>
+        </buffer>
+        <buffer name="intensities">
+            <DIM x="2" y="1" z="1"/>
+            <structure>
+                <field value="FLOAT"/>
+            </structure>
+        </buffer>
+        <buffer name="maxRanges">
+            <DIM x="2" y="1" z="1"/>
+            <structure>
+                <field value="FLOAT"/>
+            </structure>
+        </buffer>
+        <buffer name="enableds">
+            <DIM x="2" y="1" z="1"/>
+            <structure>
+                <field value="BOOL"/>
+            </structure>
+        </buffer>
+    </buffers>
+
     <renderTargets>
         <renderTarget name="gBuffer">
             <SIZE width="1280" height="720"/>
@@ -32,7 +65,16 @@
             <colors>
                 <cubemap name="pointLightShadowMap1" internalFormat="R32F"/>
             </colors>
-            <depth name="cmDepth" internalFormat="DEPTH_COMPONENT32F"/>
+            <depth name="cmDepth1" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap2">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap2" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth2" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
     </renderTargets>
 
@@ -95,13 +137,46 @@
             <state name="shadow"/>
         </material>
 
-        <material name="pointLightShadowMap">
+        <material name="pointLightShadowMap1">
             <shader name="pointLightShadowMap">
                 <values>
                     <!-- Point light 1 props -->
                     <valueof uniform   = "LIGHT_POS"
                              type      = "LIGHT"
                              context   = "PointLight1"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap2">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight2"
                              component = "POSITION"
                     />
 
@@ -247,11 +322,6 @@
                              context   = "Sun"
                              component = "LIGHT_INTENSITY"
                     />
-                    <valueof uniform   = "DIRECT_LIGHT_AMBIENT_STRENGTH"
-                             type      = "LIGHT"
-                             context   = "Sun"
-                             component = "AMBIENT_LIGHT_STRENGTH"
-                    />
                     <valueof uniform   = "DIRECT_LIGHT_ENABLED"
                              type      = "LIGHT"
                              context   = "Sun"
@@ -268,41 +338,17 @@
                              component = "TS05_PVM_MATRIX"
                     />
 
-                    <!-- Point light 1 props -->
-                    <valueof uniform   = "POINT_LIGHT_1_POS"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "POSITION"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_COLOR"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "COLOR"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_INTENSITY"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "LIGHT_INTENSITY"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_AMBIENT_STRENGTH"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "AMBIENT_LIGHT_STRENGTH"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_MAX_RANGE"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "POINT_LIGHT_MAX_RANGE"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_ENABLED"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "ENABLED"
-                    />
+
+                    <!-- Point light shadow maps -->
                     <valueof uniform   = "POINT_LIGHT_1_SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "2"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_2_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "3"
                     />
 
                     <!-- Camera props -->
@@ -326,6 +372,12 @@
                              context   = "MainCamera"
 							 component = "VIEW_MATRIX"
                     />
+
+                    <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "AMBIENT_LIGHT_STRENGTH"
+                    />
                 </values>
             </shader>
             <textures>
@@ -342,7 +394,35 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
+                <texture name="pointLightShadowMap2" UNIT="3">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
+            <buffers>
+                <buffer name="positions">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="1"/>
+                </buffer>
+                <buffer name="colors">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="2"/>
+                </buffer>
+                <buffer name="intensities">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="3"/>
+                </buffer>
+                <buffer name="maxRanges">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="4"/>
+                </buffer>
+                <buffer name="enableds">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="5"/>
+                </buffer>
+            </buffers>
         </material>
 
         <material name="render">
@@ -408,54 +488,24 @@
                              context   = "Sun"
                              component = "ENABLED"
                     />
-                    <valueof uniform   = "DIRECT_LIGHT_AMBIENT_STRENGTH"
-                             type      = "LIGHT"
-                             context   = "Sun"
-                             component = "AMBIENT_LIGHT_STRENGTH"
-                    />
                     <valueof uniform   = "DIRECT_LIGHT_SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "6"
                     />
 
-                    <!-- Point light 1 props -->
-                    <valueof uniform   = "POINT_LIGHT_1_POS"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "POSITION"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_COLOR"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "COLOR"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_INTENSITY"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "LIGHT_INTENSITY"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_AMBIENT_STRENGTH"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "AMBIENT_LIGHT_STRENGTH"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_MAX_RANGE"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "POINT_LIGHT_MAX_RANGE"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_1_ENABLED"
-                             type      = "LIGHT"
-                             context   = "PointLight1"
-                             component = "ENABLED"
-                    />
+                    <!-- Point light shadow maps -->
                     <valueof uniform   = "POINT_LIGHT_1_SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "7"
                     />
-
+                    <valueof uniform   = "POINT_LIGHT_2_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "8"
+                    />
+                    
                     <!-- Other props -->
 					<valueof uniform   = "V"
                              type      = "CAMERA"
@@ -466,6 +516,11 @@
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "FAR"
+                    />
+                    <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "AMBIENT_LIGHT_STRENGTH"
                     />
                 </values>
             </shader>
@@ -488,7 +543,35 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
+                <texture name="pointLightShadowMap2" UNIT="8">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
+            <buffers>
+                <buffer name="positions">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="1"/>
+                </buffer>
+                <buffer name="colors">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="2"/>
+                </buffer>
+                <buffer name="intensities">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="3"/>
+                </buffer>
+                <buffer name="maxRanges">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="4"/>
+                </buffer>
+                <buffer name="enableds">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="5"/>
+                </buffer>
+            </buffers>
         </material>
 
         <!-- DEBUG materials -->

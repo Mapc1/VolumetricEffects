@@ -10,9 +10,9 @@
             <attribute type="STATE" name="SKYBOX_FAR" data="INT" value="3500"/>
 
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
-            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="500.0"/>
 
+            <attribute type="RENDERER" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
             <attribute type="RENDERER" name="GAMMA" data="FLOAT" value="2.2"/>
         </attributes>
@@ -62,9 +62,15 @@
                 <DIRECTION x="0.5" y="-0.7" z="0.4"/>
                 <COLOR r="1.0" g="1.0" b="1.0"/>
             </light>
+
+            <!-- Point lights -->
             <light name="PointLight1">
                 <COLOR r="0.6" g="0.1" b="0.1"/>
                 <POSITION x="0.0" y="500.0" z="0.0"/>
+            </light>
+            <light name="PointLight2">
+                <COLOR r="0.2" g="0.4" b="0.55"/>
+                <POSITION x="0.0" y="700.0" z="500.0"/>
             </light>
         </lights>
 
@@ -75,7 +81,9 @@
 
     <pipelines>
         <pipeline name="ray-marching" defaultCamera="MainCamera">
+
             <pass class="depthmap" name="genShadowMap">
+                <preScript file="scripts/light_loading.lua" script="lights"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
@@ -89,16 +97,26 @@
                 </materialMaps>
             </pass>
 
-            <pass class="default" name="genPointLighShadowMap">
+            <pass class="default" name="genPointLightShadowMap1">
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
                 <renderTarget name="pointLightShadowMap1" fromLibrary="RayMarching"/>
                 <materialMaps>
-                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap"/>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap1"/>
                 </materialMaps>
             </pass>
 
+            <pass class="default" name="genPointLightShadowMap2">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap2" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap2"/>
+                </materialMaps>
+            </pass>
+        
             <pass class="default" name="gBuffer">
                 <viewport name="MainViewport"/>
                 <scenes>
@@ -219,6 +237,7 @@
             <pipelineList label="Pipeline" />
             <var label="Ray-marching steps" type="STATE" context="RayMarching::scatIntegration" component="NUM_STEPS" def="min=1 max=5000"/>
             <var label="Skybox far" type="STATE" context="RayMarching::skybox_gBuffer" component="SKYBOX_FAR" def="min=3000 max=7000"/>
+            <var label="Ambient light strength" type="RENDERER" context="CURRENT" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
             <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
         </window>
         <window label="Fog properties">
@@ -231,16 +250,21 @@
             <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
             <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR"/>
-            <var label="Ambient light strength" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
             <var label="Enabled" type="LIGHT" context="Sun" component="ENABLED"/>
         </window>
         <window label="Point light 1 properties">
             <var label="Light position" type="LIGHT" context="PointLight1" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight1" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight1" component="COLOR" mode="COLOR"/>
-            <var label="Ambient light strength" type="LIGHT" context="PointLight1" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
-            <var label="Light constant attenuation" type="LIGHT" context="PointLight1" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light max range" type="LIGHT" context="PointLight1" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight1" component="ENABLED"/>
+        </window>
+        <window label="Point light 2 properties">
+            <var label="Light position" type="LIGHT" context="PointLight2" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight2" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight2" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight2" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight2" component="ENABLED"/>
         </window>
     </interface>
 </project>

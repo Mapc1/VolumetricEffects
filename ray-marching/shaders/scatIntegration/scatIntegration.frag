@@ -18,20 +18,16 @@ uniform float DENSITY;
 // Directional light props
 uniform vec4 DIRECT_LIGHT_DIR;
 uniform vec4 DIRECT_LIGHT_COLOR;
-uniform float DIRECT_LIGHT_AMBIENT_STRENGTH;
 uniform float DIRECT_LIGHT_INTENSITY;
 uniform bool DIRECT_LIGHT_ENABLED;
 uniform sampler2DShadow DIRECT_LIGHT_SHADOW_MAP;
 uniform mat4 DIRECT_LIGHT_SPACE_MAT;
 
-// Point light 1 props
-uniform vec4 POINT_LIGHT_1_POS;
-uniform vec4 POINT_LIGHT_1_COLOR;
-uniform float POINT_LIGHT_1_AMBIENT_STRENGTH;
-uniform float POINT_LIGHT_1_INTENSITY;
-uniform float POINT_LIGHT_1_MAX_RANGE;
-uniform bool POINT_LIGHT_1_ENABLED;
+uniform float AMBIENT_LIGHT_STRENGTH;
+
+// Point light shadow maps
 uniform samplerCube POINT_LIGHT_1_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_2_SHADOW_MAP;
 
 // Camera props
 uniform vec4 CAM_POS;
@@ -45,6 +41,22 @@ uniform mat4 V;
 in Data {
     vec2 texCoord;
 } Inputs;
+
+layout(std430, binding = 1) buffer Buff1 {
+    vec4 positions[2];
+};
+layout(std430, binding = 2) buffer Buff2 {
+    vec4 colors[2];
+};
+layout(std430, binding = 3) buffer Buff3 {
+    float intensities[2];
+};
+layout(std430, binding = 4) buffer Buff4 {
+    float maxRanges[2];
+};
+layout(std430, binding = 5) buffer Buff5 {
+    bool enableds[2];
+};
 
 layout (location = 0) out vec4 accum_scattering;
 layout (location = 1) out vec4 accum_transmittance;
@@ -63,25 +75,36 @@ float isotropicPhase() {
     return 1/(4*3.14159);
 }
 
-vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange) {
+float sampleCorrectShadowMap(int lightID, vec3 rayDir){
+    switch (lightID) {
+        case 0:
+            return texture(POINT_LIGHT_1_SHADOW_MAP, rayDir).r;
+        case 1:
+            return texture(POINT_LIGHT_2_SHADOW_MAP, rayDir).r;
+        default:
+            return 0.0;
+    }
+}
+
+vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange, int lightID) {
     vec3 frag_light_dir = (worldPos - lightPos).xyz;
     float current_depth = length(frag_light_dir);
 
-    float closest_depth = texture(POINT_LIGHT_1_SHADOW_MAP, frag_light_dir).r;
+    float closest_depth = sampleCorrectShadowMap(lightID, frag_light_dir);
     closest_depth *= FAR;
 
     float bias = 0;
     float shadow = current_depth - bias <= closest_depth ? 1.0 : 0.0;
     float attenuation = max(0.0, (pow(maxRange, (maxRange-current_depth)/maxRange)) / maxRange);
 
-    return vec2(shadow * (1-POINT_LIGHT_1_AMBIENT_STRENGTH) + POINT_LIGHT_1_AMBIENT_STRENGTH, POINT_LIGHT_1_AMBIENT_STRENGTH) * attenuation ;
+    return vec2(shadow * (1-AMBIENT_LIGHT_STRENGTH) + AMBIENT_LIGHT_STRENGTH, AMBIENT_LIGHT_STRENGTH) * attenuation ;
 }
 
 vec2 directLightLuminance(vec4 worldPos) {
     vec4 light_space_pos = DIRECT_LIGHT_SPACE_MAT * worldPos;
     float shadow = textureProj(DIRECT_LIGHT_SHADOW_MAP, light_space_pos);
 
-    return vec2(shadow * (1-DIRECT_LIGHT_AMBIENT_STRENGTH) + DIRECT_LIGHT_AMBIENT_STRENGTH, DIRECT_LIGHT_AMBIENT_STRENGTH);
+    return vec2(shadow * (1-AMBIENT_LIGHT_STRENGTH) + AMBIENT_LIGHT_STRENGTH, AMBIENT_LIGHT_STRENGTH);
 }
 
 float mean3(vec3 v) {
@@ -164,13 +187,21 @@ void main() {
             in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
             in_scattering += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
         }
-        if (POINT_LIGHT_1_ENABLED) {
-            vec4 world_light_dir = cur_world_pos-POINT_LIGHT_1_POS;
-            vec2 luminances = pointLightLuminance(cur_world_pos, POINT_LIGHT_1_POS, POINT_LIGHT_1_MAX_RANGE);
-            float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
+        for (int i = 0; i < 2; i++) {
+            vec4 light_pos = positions[i];
+            vec4 light_color = colors[i];
+            float light_intensity = intensities[i];
+            float max_range = maxRanges[i];
+            bool enabled = enableds[i];
 
-            in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, POINT_LIGHT_1_COLOR, POINT_LIGHT_1_INTENSITY);
-            in_scattering += calcScattering(scattering, phase, luminances.x, POINT_LIGHT_1_COLOR, POINT_LIGHT_1_INTENSITY);
+            if (enabled) {
+                vec4 world_light_dir = cur_world_pos - light_pos;
+                vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, max_range, i);
+                float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
+
+                in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity); 
+                in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity); 
+            }
         }
 
         vec4 scatTrans = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride);

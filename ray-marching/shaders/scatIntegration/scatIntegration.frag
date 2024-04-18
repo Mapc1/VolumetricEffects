@@ -28,6 +28,14 @@ uniform float AMBIENT_LIGHT_STRENGTH;
 // Point light shadow maps
 uniform samplerCube POINT_LIGHT_1_SHADOW_MAP;
 uniform samplerCube POINT_LIGHT_2_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_3_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_4_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_5_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_6_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_7_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_8_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_9_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_10_SHADOW_MAP;
 
 // Camera props
 uniform vec4 CAM_POS;
@@ -37,25 +45,26 @@ uniform float FAR;
 // Renderer props
 uniform mat4 V;
 
+const int NUM_LIGHTS = 10;
 
 in Data {
     vec2 texCoord;
 } Inputs;
 
 layout(std430, binding = 1) buffer Buff1 {
-    vec4 positions[2];
+    vec4 positions[NUM_LIGHTS];
 };
 layout(std430, binding = 2) buffer Buff2 {
-    vec4 colors[2];
+    vec4 colors[NUM_LIGHTS];
 };
 layout(std430, binding = 3) buffer Buff3 {
-    float intensities[2];
+    float intensities[NUM_LIGHTS];
 };
 layout(std430, binding = 4) buffer Buff4 {
-    float maxRanges[2];
+    float maxRanges[NUM_LIGHTS];
 };
 layout(std430, binding = 5) buffer Buff5 {
-    bool enableds[2];
+    bool enableds[NUM_LIGHTS];
 };
 
 layout (location = 0) out vec4 accum_scattering;
@@ -81,6 +90,22 @@ float sampleCorrectShadowMap(int lightID, vec3 rayDir){
             return texture(POINT_LIGHT_1_SHADOW_MAP, rayDir).r;
         case 1:
             return texture(POINT_LIGHT_2_SHADOW_MAP, rayDir).r;
+        case 2:
+            return texture(POINT_LIGHT_3_SHADOW_MAP, rayDir).r;
+        case 3:
+            return texture(POINT_LIGHT_4_SHADOW_MAP, rayDir).r;
+        case 4:
+            return texture(POINT_LIGHT_5_SHADOW_MAP, rayDir).r;
+        case 5:
+            return texture(POINT_LIGHT_6_SHADOW_MAP, rayDir).r;
+        case 6:
+            return texture(POINT_LIGHT_7_SHADOW_MAP, rayDir).r;
+        case 7:
+            return texture(POINT_LIGHT_8_SHADOW_MAP, rayDir).r;
+        case 8:
+            return texture(POINT_LIGHT_9_SHADOW_MAP, rayDir).r;
+        case 9:
+            return texture(POINT_LIGHT_10_SHADOW_MAP, rayDir).r;
         default:
             return 0.0;
     }
@@ -187,7 +212,7 @@ void main() {
             in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
             in_scattering += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
         }
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < NUM_LIGHTS; i++) {
             vec4 light_pos = positions[i];
             vec4 light_color = colors[i];
             float light_intensity = intensities[i];
@@ -199,8 +224,8 @@ void main() {
                 vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, max_range, i);
                 float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
 
-                in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity); 
-                in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity); 
+                in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity);
+                in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity);
             }
         }
 

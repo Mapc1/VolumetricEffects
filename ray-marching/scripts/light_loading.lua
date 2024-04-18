@@ -36,9 +36,10 @@ lights = function()
     local intensity = {0}
     local range = {0}
     local enabled = {0}
-    local ptr = 0
 
-    for i = 1, 2, 1 do
+    local numLights = 10
+
+    for i = 1, numLights, 1 do
         position, color, intensity, range, enabled = GetLight(i)
         InsertLight(position, color, intensity, range, enabled, i-1)
     end

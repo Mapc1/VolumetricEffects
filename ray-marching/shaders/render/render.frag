@@ -11,6 +11,14 @@ uniform mat4 DIRECT_LIGHT_SPACE_MAT;
 // Point light shadow maps
 uniform samplerCube POINT_LIGHT_1_SHADOW_MAP;
 uniform samplerCube POINT_LIGHT_2_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_3_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_4_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_5_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_6_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_7_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_8_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_9_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_10_SHADOW_MAP;
 
 // GBuffer
 uniform sampler2D POSITION;
@@ -24,22 +32,23 @@ uniform sampler2D SKYBOX_FLAG;
 uniform float FAR;
 uniform mat4 V,M;
 
+const int NUM_LIGHTS = 10;
 const float GAMMA = 2.2;
 
 layout(std430, binding = 1) buffer Buff1 {
-    vec4 positions[2];
+    vec4 positions[NUM_LIGHTS];
 };
 layout(std430, binding = 2) buffer Buff2 {
-    vec4 colors[2];
+    vec4 colors[NUM_LIGHTS];
 };
 layout(std430, binding = 3) buffer Buff3 {
-    float intensities[2];
+    float intensities[NUM_LIGHTS];
 };
 layout(std430, binding = 4) buffer Buff4 {
-    float maxRanges[2];
+    float maxRanges[NUM_LIGHTS];
 };
 layout(std430, binding = 5) buffer Buff5 {
-    bool enableds[2];
+    bool enableds[NUM_LIGHTS];
 };
 
 in Data {
@@ -74,6 +83,22 @@ float sampleCorrectShadowMap(int lightID, vec3 rayDir){
             return texture(POINT_LIGHT_1_SHADOW_MAP, rayDir).r;
         case 1:
             return texture(POINT_LIGHT_2_SHADOW_MAP, rayDir).r;
+        case 2:
+            return texture(POINT_LIGHT_3_SHADOW_MAP, rayDir).r;
+        case 3:
+            return texture(POINT_LIGHT_4_SHADOW_MAP, rayDir).r;
+        case 4:
+            return texture(POINT_LIGHT_5_SHADOW_MAP, rayDir).r;
+        case 5:
+            return texture(POINT_LIGHT_6_SHADOW_MAP, rayDir).r;
+        case 6:
+            return texture(POINT_LIGHT_7_SHADOW_MAP, rayDir).r;
+        case 7:
+            return texture(POINT_LIGHT_8_SHADOW_MAP, rayDir).r;
+        case 8:
+            return texture(POINT_LIGHT_9_SHADOW_MAP, rayDir).r;
+        case 9:
+            return texture(POINT_LIGHT_10_SHADOW_MAP, rayDir).r;
         default:
             return 0.0;
     }
@@ -123,7 +148,7 @@ void main() {
         }
 
         // Point lights
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < NUM_LIGHTS; i++) {
             vec4 light_pos = positions[i];
             vec4 light_color = colors[i];
             float maxRange = maxRanges[i];

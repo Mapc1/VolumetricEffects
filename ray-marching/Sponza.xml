@@ -72,6 +72,38 @@
                 <COLOR r="0.2" g="0.4" b="0.55"/>
                 <POSITION x="0.0" y="700.0" z="500.0"/>
             </light>
+            <light name="PointLight3">
+                <COLOR r="0.2" g="0.4" b="0.55"/>
+                <POSITION x="0.0" y="-700.0" z="-500.0"/>
+            </light>
+            <light name="PointLight4">
+                <COLOR r="0.2" g="0.7" b="0.3"/>
+                <POSITION x="1000.0" y="300.0" z="0.0"/>
+            </light>
+            <light name="PointLight5">
+                <COLOR r="0.3" g="0.4" b="0.2"/>
+                <POSITION x="-1000.0" y="200.0" z="300.0"/>
+            </light>
+            <light name="PointLight6">
+                <COLOR r="0.7" g="0.5" b="0.5"/>
+                <POSITION x="400.0" y="1000.0" z="0.0"/>
+            </light>
+            <light name="PointLight7">
+                <COLOR r="0.2" g="0.8" b="0.8"/>
+                <POSITION x="0.0" y="100.0" z="0.0"/>
+            </light>
+            <light name="PointLight8">
+                <COLOR r="0.7" g="0.7" b="0.2"/>
+                <POSITION x="300.0" y="200.0" z="-400.0"/>
+            </light>
+            <light name="PointLight9">
+                <COLOR r="0.5" g="0.2" b="0.55"/>
+                <POSITION x="0.0" y="0.0" z="500.0"/>
+            </light>
+            <light name="PointLight10">
+                <COLOR r="0.5" g="0.8" b="0.55"/>
+            <POSITION x="-1000.0" y="560.0" z="-100.0"/>
+            </light>
         </lights>
 
         <materialLibs>
@@ -83,7 +115,7 @@
         <pipeline name="ray-marching" defaultCamera="MainCamera">
 
             <pass class="depthmap" name="genShadowMap">
-                <preScript file="scripts/light_loading.lua" script="lights"/>
+                <mode value="RUN_ONCE"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
@@ -98,6 +130,7 @@
             </pass>
 
             <pass class="default" name="genPointLightShadowMap1">
+                <mode value="RUN_ONCE"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
@@ -108,6 +141,7 @@
             </pass>
 
             <pass class="default" name="genPointLightShadowMap2">
+                <mode value="RUN_ONCE"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
@@ -116,8 +150,97 @@
                     <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap2"/>
                 </materialMaps>
             </pass>
-        
+
+            <pass class="default" name="genPointLightShadowMap3">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap3" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap3"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap4">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap4" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap4"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap5">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap5" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap5"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap6">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap6" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap6"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap7">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap7" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap7"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap8">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap8" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap8"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap9">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap9" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap9"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap10">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap10" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightShadowMap10"/>
+                </materialMaps>
+            </pass>
+
             <pass class="default" name="gBuffer">
+                <preScript file="scripts/light_loading.lua" script="lights"/>
                 <viewport name="MainViewport"/>
                 <scenes>
                     <scene name="Sponza"/>
@@ -265,6 +388,62 @@
             <var label="Light color" type="LIGHT" context="PointLight2" component="COLOR" mode="COLOR"/>
             <var label="Light max range" type="LIGHT" context="PointLight2" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight2" component="ENABLED"/>
+        </window>
+        <window label="Point light 3 properties">
+            <var label="Light position" type="LIGHT" context="PointLight3" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight3" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight3" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight3" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight3" component="ENABLED"/>
+        </window>
+        <window label="Point light 4 properties">
+            <var label="Light position" type="LIGHT" context="PointLight4" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight4" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight4" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight4" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight4" component="ENABLED"/>
+        </window>
+        <window label="Point light 5 properties">
+            <var label="Light position" type="LIGHT" context="PointLight5" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight5" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight5" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight5" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight5" component="ENABLED"/>
+        </window>
+        <window label="Point light 6 properties">
+            <var label="Light position" type="LIGHT" context="PointLight6" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight6" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight6" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight6" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight6" component="ENABLED"/>
+        </window>
+        <window label="Point light 7 properties">
+            <var label="Light position" type="LIGHT" context="PointLight7" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight7" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight7" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight7" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight7" component="ENABLED"/>
+        </window>
+        <window label="Point light 8 properties">
+            <var label="Light position" type="LIGHT" context="PointLight8" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight8" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight8" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight8" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight8" component="ENABLED"/>
+        </window>
+        <window label="Point light 9 properties">
+            <var label="Light position" type="LIGHT" context="PointLight9" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight9" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight9" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight9" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight9" component="ENABLED"/>
+        </window>
+        <window label="Point light 10 properties">
+            <var label="Light position" type="LIGHT" context="PointLight10" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight10" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight10" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight10" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight10" component="ENABLED"/>
         </window>
     </interface>
 </project>

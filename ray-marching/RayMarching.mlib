@@ -2,31 +2,31 @@
 <materialLib name="RayMarching">
     <buffers>
         <buffer name="positions">
-            <DIM x="2" y="1" z="1"/>
+            <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="VEC4"/>
             </structure>
         </buffer>
         <buffer name="colors">
-            <DIM x="2" y="1" z="1"/>
+            <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="VEC4"/>
             </structure>
         </buffer>
         <buffer name="intensities">
-            <DIM x="2" y="1" z="1"/>
+            <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="FLOAT"/>
             </structure>
         </buffer>
         <buffer name="maxRanges">
-            <DIM x="2" y="1" z="1"/>
+            <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="FLOAT"/>
             </structure>
         </buffer>
         <buffer name="enableds">
-            <DIM x="2" y="1" z="1"/>
+            <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="BOOL"/>
             </structure>
@@ -75,6 +75,78 @@
                 <cubemap name="pointLightShadowMap2" internalFormat="R32F"/>
             </colors>
             <depth name="cmDepth2" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap3">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap3" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth3" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap4">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap4" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth4" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap5">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap5" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth5" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap6">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap6" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth6" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap7">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap7" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth7" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap8">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap8" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth8" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap9">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap9" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth9" internalFormat="DEPTH_COMPONENT32F"/>
+        </renderTarget>
+
+        <renderTarget name="pointLightShadowMap10">
+            <SIZE width="1024" height="1024"/>
+            <CLEAR_VALUES r="1.0" g="1.0" b="1.0" a="1.0"/>
+            <colors>
+                <cubemap name="pointLightShadowMap10" internalFormat="R32F"/>
+            </colors>
+            <depth name="cmDepth10" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
     </renderTargets>
 
@@ -177,6 +249,270 @@
                     <valueof uniform   = "LIGHT_POS"
                              type      = "LIGHT"
                              context   = "PointLight2"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap3">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight3"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap4">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight4"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap5">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight5"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap6">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight6"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap7">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight7"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap8">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight8"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap9">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight9"
+                             component = "POSITION"
+                    />
+
+                    <!-- Cubemap camera props -->
+                    <valueof uniform   = "CM_P"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "PROJECTION_MATRIX"
+                    />
+                    <valueof uniform   = "CM_FAR"
+                             type      = "CAMERA"
+                             context   = "CM_FOV_90"
+                             component = "FAR"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                </values>
+            </shader>
+            <state name="shadow"/>
+        </material>
+
+        <material name="pointLightShadowMap10">
+            <shader name="pointLightShadowMap">
+                <values>
+                    <!-- Point light 1 props -->
+                    <valueof uniform   = "LIGHT_POS"
+                             type      = "LIGHT"
+                             context   = "PointLight10"
                              component = "POSITION"
                     />
 
@@ -350,6 +686,46 @@
                              component = "UNIT"
                              id        = "3"
                     />
+                    <valueof uniform   = "POINT_LIGHT_3_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "4"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_4_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "5"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_5_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "6"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_6_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "7"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_7_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "8"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_8_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "9"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_9_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "10"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_10_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "11"
+                    />
 
                     <!-- Camera props -->
                     <valueof uniform   = "CAM_POS"
@@ -395,6 +771,54 @@
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
                 <texture name="pointLightShadowMap2" UNIT="3">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap3" UNIT="4">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap4" UNIT="5">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap5" UNIT="6">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap6" UNIT="7">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap7" UNIT="8">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap8" UNIT="9">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap9" UNIT="10">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap10" UNIT="11">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>
                     <MIN_FILTER value="LINEAR"/>
@@ -505,6 +929,46 @@
                              component = "UNIT"
                              id        = "8"
                     />
+                    <valueof uniform   = "POINT_LIGHT_3_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "9"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_4_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "10"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_5_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "11"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_6_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "12"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_7_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "13"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_8_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "14"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_9_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "15"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_10_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "16"
+                    />
                     
                     <!-- Other props -->
 					<valueof uniform   = "V"
@@ -544,6 +1008,54 @@
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
                 <texture name="pointLightShadowMap2" UNIT="8">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap3" UNIT="9">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap4" UNIT="10">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap5" UNIT="11">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap6" UNIT="12">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap7" UNIT="13">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap8" UNIT="14">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap9" UNIT="15">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap10" UNIT="16">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>
                     <MIN_FILTER value="LINEAR"/>

@@ -2,11 +2,11 @@
 <project name="Volumetric Effects - Froxels" width="1280" height="720">
     <assets>
         <attributes>
-            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.2"/>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.7"/>
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
-            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.0003"/>
-            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="5"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>

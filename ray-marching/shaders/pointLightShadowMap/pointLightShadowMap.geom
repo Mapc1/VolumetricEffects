@@ -42,7 +42,7 @@ mat4[6] genMatrices(vec4 lightPos) {
 		mat4( 1, 0, 0, 0,
 			  0, 0, 1, 0,
 	          0,-1, 0, 0,
- 	          lightPos.x, lightPos.z, -lightPos.y, 1
+ 	          -lightPos.x, lightPos.z, -lightPos.y, 1
 		);
 
      // POS Z

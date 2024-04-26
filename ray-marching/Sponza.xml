@@ -3,13 +3,13 @@
     <assets>
         <attributes>
             <attribute type="STATE" name="NUM_STEPS" data="INT" value="64"/>
-            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.2"/>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.7"/>
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
-            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.0003"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
             <attribute type="STATE" name="SKYBOX_FAR" data="INT" value="3500"/>
 
-            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="1"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="5"/>
             <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="500.0"/>
 
             <attribute type="RENDERER" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
@@ -207,7 +207,6 @@
             </pass>
 
             <pass class="default" name="genPointLightShadowMap8">
-                <mode value="RUN_ONCE"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>

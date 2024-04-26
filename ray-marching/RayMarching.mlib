@@ -206,7 +206,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap1">
@@ -272,7 +271,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap3">
@@ -338,7 +336,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap5">
@@ -371,7 +368,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap6">
@@ -404,7 +400,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap7">
@@ -437,7 +432,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap8">
@@ -470,7 +464,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap9">
@@ -503,7 +496,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="pointLightShadowMap10">
@@ -536,7 +528,6 @@
                     />
                 </values>
             </shader>
-            <state name="shadow"/>
         </material>
 
         <material name="gBuffer">

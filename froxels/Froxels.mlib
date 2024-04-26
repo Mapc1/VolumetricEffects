@@ -2,7 +2,7 @@
 <materialLib name="Froxels">
     <renderTargets>
         <renderTarget name="shadowMap">
-            <SIZE width="8192" height="8192"/>
+            <SIZE width="4096" height="4096"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
     </renderTargets>

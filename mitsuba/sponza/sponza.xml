@@ -6,16 +6,17 @@
 	<!-- Camera and Rendering Parameters -->
 
 	<integrator type="volpath" id="elm__0" name="elm__0">
-		<integer name="max_depth" value="12" />
+		<integer name="max_depth" value="2" />
 	</integrator>
 
 
 	<medium type="homogeneous" id="fog">
 		<rgb name="albedo" value="0.9, 0.9, 0.9"/>
-		<float name="sigma_t" value="0.0003"/>
+		<float name="sigma_t" value="1"/>
+		<float name="scale" value="0.001"/>
 	
 		<phase type="hg">
-			<float name="g" value="0.2"/>
+			<float name="g" value="0.7"/>
 		</phase>
 	</medium>
 
@@ -26,6 +27,7 @@
 			<lookat origin="900,500,500" target="600,800,-400" up="0,1,0" />
 		</transform>
 		<float name="fov" value="60" />
+		<string name="fov_axis" value="y"/>
 
 		<!-- Render with 32 samples per pixel using a basic
            independent sampling strategy -->
@@ -40,13 +42,14 @@
 		</film>
 
 		<float name="near_clip" value="0.1"/>
-		<float name="far_clip" value="6000"/>
+		<float name="far_clip" value="7000"/>
 	</sensor>
 
 	
-	<shape type="sphere">
-	    <point name="center" x="0" y="0" z="0"/>
-	    <float name="radius" value="3000"/>
+	<shape type="cube">
+		<transform name="to_world">
+			<scale x="3000" y="1000" z="3000"/>
+		</transform>
 		<bsdf type="null"/>
 		<ref name="interior" id="fog"/>
 	</shape>

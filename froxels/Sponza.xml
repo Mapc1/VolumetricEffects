@@ -8,6 +8,7 @@
             <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="5"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
+            <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="500.0"/>
             <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
         </attributes>
@@ -24,6 +25,10 @@
             <viewport name="MainViewport">
                 <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
             </viewport>
+            <viewport name="CM_Viewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+                <SIZE width="1024" height="1024"/>
+            </viewport>
         </viewports>
 
         <cameras>
@@ -34,12 +39,65 @@
                 <LOOK_AT_POINT x="600" y="800" z="-400"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
+
+            <!-- Cubemap camera -->
+            <camera name="CM_FOV_90">
+                <viewport name="CM_Viewport" />
+                <POSITION x="0" y="0" z="0.0" />
+                <VIEW x="1.0" y="0.0" z="0.0" />
+                <NEAR value = "1.0" />
+                <FAR value="7000.0"/>
+                <FOV value = "90" />
+                <UP x="0" y="-1" z="0" />
+                </camera>
         </cameras>
 
         <lights>
             <light name="Sun">
                 <DIRECTION x="0.5" y="-0.7" z="0.4"/>
                 <COLOR r="1.0" g="1.0" b="1.0"/>
+            </light>
+
+            <!-- Point lights -->
+            <light name="PointLight1">
+                <COLOR r="0.6" g="0.1" b="0.1"/>
+                <POSITION x="0.0" y="500.0" z="0.0"/>
+            </light>
+            <light name="PointLight2">
+                <COLOR r="0.2" g="0.4" b="0.55"/>
+                <POSITION x="0.0" y="700.0" z="500.0"/>
+            </light>
+            <light name="PointLight3">
+                <COLOR r="0.2" g="0.4" b="0.55"/>
+                <POSITION x="0.0" y="-700.0" z="-500.0"/>
+            </light>
+            <light name="PointLight4">
+                <COLOR r="0.2" g="0.7" b="0.3"/>
+                <POSITION x="1000.0" y="300.0" z="0.0"/>
+            </light>
+            <light name="PointLight5">
+                <COLOR r="0.3" g="0.4" b="0.2"/>
+                <POSITION x="-1000.0" y="200.0" z="300.0"/>
+            </light>
+            <light name="PointLight6">
+                <COLOR r="0.7" g="0.5" b="0.5"/>
+                <POSITION x="400.0" y="1000.0" z="0.0"/>
+            </light>
+            <light name="PointLight7">
+                <COLOR r="0.2" g="0.8" b="0.8"/>
+                <POSITION x="0.0" y="100.0" z="0.0"/>
+            </light>
+            <light name="PointLight8">
+                <COLOR r="0.7" g="0.7" b="0.2"/>
+                <POSITION x="300.0" y="200.0" z="-400.0"/>
+            </light>
+            <light name="PointLight9">
+                <COLOR r="0.5" g="0.2" b="0.55"/>
+                <POSITION x="0.0" y="0.0" z="500.0"/>
+            </light>
+            <light name="PointLight10">
+                <COLOR r="0.5" g="0.8" b="0.55"/>
+                <POSITION x="-1000.0" y="560.0" z="-100.0"/>
             </light>
         </lights>
 
@@ -64,7 +122,117 @@
                 </materialMaps>
             </pass>
 
+            <pass class="default" name="genPointLightShadowMap1">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap1" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap1"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap2">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap2" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap2"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap3">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap3" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap3"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap4">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap4" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap4"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap5">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap5" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap5"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap6">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap6" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap6"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap7">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap7" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap7"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap8">
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap8" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap8"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap9">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap9" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap9"/>
+                </materialMaps>
+            </pass>
+
+            <pass class="default" name="genPointLightShadowMap10">
+                <mode value="RUN_ONCE"/>
+                <scenes>
+                    <scene name="Sponza"/>
+                </scenes>
+                <renderTarget name="pointLightShadowMap10" fromLibrary="Froxels"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="Froxels" toMaterial="pointLightShadowMap10"/>
+                </materialMaps>
+            </pass>
+
             <pass class="compute" name="CalcScattering">
+                <preScript file="scripts/light_loading.lua" script="lights"/>
                 <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="128"/>
             </pass>
 
@@ -85,6 +253,28 @@
                 <injectionMaps>
                     <map toMaterial="*">
                         <shader fromMaterial="render" fromLibrary="Froxels" />
+                        <buffers>
+                            <buffer name="positions" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="1"/>
+                            </buffer>
+                            <buffer name="colors" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="2"/>
+                            </buffer>
+                            <buffer name="intensities" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="3"/>
+                            </buffer>
+                            <buffer name="maxRanges" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="4"/>
+                            </buffer>
+                            <buffer name="enableds" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="5"/>
+                            </buffer>
+                        </buffers>
                         <textures>
                             <texture name="integrationTex" fromLibrary="Froxels" toUnit="2">
                                 <MIN_FILTER value="LINEAR"/>
@@ -93,8 +283,68 @@
                             <texture name="shadowMap" fromLibrary="Froxels" toUnit="1">
                                 <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                                 <COMPARE_FUNC value="LEQUAL"/>
-                                <MIN_FILTER value="NEAREST"/>
-                                <MAG_FILTER value="NEAREST"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap1" fromLibrary="Froxels" toUnit="3">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap2" fromLibrary="Froxels" toUnit="4">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap3" fromLibrary="Froxels" toUnit="5">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap4" fromLibrary="Froxels" toUnit="6">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap5" fromLibrary="Froxels" toUnit="7">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap6" fromLibrary="Froxels" toUnit="8">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap7" fromLibrary="Froxels" toUnit="9">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap8" fromLibrary="Froxels" toUnit="10">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap9" fromLibrary="Froxels" toUnit="11">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                            <texture name="pointLightShadowMap10" fromLibrary="Froxels" toUnit="12">
+                                <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                                <COMPARE_FUNC value="LEQUAL"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
                             </texture>
                         </textures>
                     </map>
@@ -108,15 +358,92 @@
 
     <interface>
         <window label="settings">
-            <var label="Anisotropy" type="STATE" context="Froxels::calcScattering" component="ANISOTROPY" def="min=0 max=0.999"/>
-            <var label="Scattering" type="STATE" context="Froxels::calcScattering" component="SCATTERING" def="min=0 max=1"/>
-            <var label="Absorption" type="STATE" context="Froxels::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
-            <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=0.1"/>
-            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
-            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
             <var label="Samples per voxel" type="STATE" context="Froxels::calcScattering" component="NUM_SAMPLES_PER_VOXEL" def="min=1 max=32"/>
             <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
         </window>
+        <window label="Fog">
+            <var label="Anisotropy" type="STATE" context="Froxels::calcScattering" component="ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Scattering" type="STATE" context="Froxels::calcScattering" component="SCATTERING" def="min=0 max=1"/>
+            <var label="Absorption" type="STATE" context="Froxels::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=0.1"/>
+        </window>
+        <window label="Directional light properties">
+            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR"/>
+            <var label="Enabled" type="LIGHT" context="Sun" component="ENABLED"/>
+        </window>
+        <window label="Point light 1 properties">
+            <var label="Light position" type="LIGHT" context="PointLight1" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight1" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight1" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight1" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight1" component="ENABLED"/>
+        </window>
+        <window label="Point light 2 properties">
+            <var label="Light position" type="LIGHT" context="PointLight2" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight2" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight2" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight2" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight2" component="ENABLED"/>
+        </window>
+        <window label="Point light 3 properties">
+            <var label="Light position" type="LIGHT" context="PointLight3" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight3" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight3" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight3" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight3" component="ENABLED"/>
+        </window>
+        <window label="Point light 4 properties">
+            <var label="Light position" type="LIGHT" context="PointLight4" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight4" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight4" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight4" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight4" component="ENABLED"/>
+        </window>
+        <window label="Point light 5 properties">
+            <var label="Light position" type="LIGHT" context="PointLight5" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight5" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight5" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight5" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight5" component="ENABLED"/>
+        </window>
+        <window label="Point light 6 properties">
+            <var label="Light position" type="LIGHT" context="PointLight6" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight6" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight6" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight6" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight6" component="ENABLED"/>
+        </window>
+        <window label="Point light 7 properties">
+            <var label="Light position" type="LIGHT" context="PointLight7" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight7" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight7" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight7" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight7" component="ENABLED"/>
+        </window>
+        <window label="Point light 8 properties">
+            <var label="Light position" type="LIGHT" context="PointLight8" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight8" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight8" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight8" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight8" component="ENABLED"/>
+        </window>
+        <window label="Point light 9 properties">
+            <var label="Light position" type="LIGHT" context="PointLight9" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight9" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight9" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight9" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight9" component="ENABLED"/>
+        </window>
+        <window label="Point light 10 properties">
+            <var label="Light position" type="LIGHT" context="PointLight10" component="POSITION" def="min=-1000 max=1000"/>
+            <var label="Light intensity" type="LIGHT" context="PointLight10" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="PointLight10" component="COLOR" mode="COLOR"/>
+            <var label="Light max range" type="LIGHT" context="PointLight10" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Enabled" type="LIGHT" context="PointLight10" component="ENABLED"/>
+        </window>
+        
     </interface>
 </project>

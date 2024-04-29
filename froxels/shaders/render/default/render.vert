@@ -2,8 +2,8 @@
 
 uniform mat3 NORMAL_MAT;
 uniform mat4 PVM, V, M;
-uniform vec4 LIGHT_DIR;
-uniform mat4 LIGHT_SPACE_MAT;
+uniform vec4 DIRECT_LIGHT_DIR;
+uniform mat4 DIRECT_LIGHT_SPACE_MAT;
 
 
 in vec4 position;
@@ -22,8 +22,8 @@ out Data {
 void main() {
     DataOut.normal = normalize(NORMAL_MAT * vec3(normal));
     DataOut.texCoord = vec2(texCoord0);
-    DataOut.lightDir = normalize(vec3(V * -LIGHT_DIR));
-    DataOut.projShadowCoord = LIGHT_SPACE_MAT * M * position;
+    DataOut.lightDir = normalize(vec3(V * -DIRECT_LIGHT_DIR));
+    DataOut.projShadowCoord = DIRECT_LIGHT_SPACE_MAT * M * position;
     DataOut.worldPos = M * position;
     DataOut.worldPos /= DataOut.worldPos.w;
 

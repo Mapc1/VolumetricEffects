@@ -8,36 +8,61 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 // Output texture
 uniform writeonly image3D SCATTERING_UNIT;
 
-// Input textures
-uniform sampler2DShadow SHADOW_MAP;
-
-// To get the world position of the froxel
+// Camera props
+uniform vec4 CAM_POS;
 uniform mat4 INV_VIEW_MAT;
 uniform mat4 INV_PROJ_MAT;
 uniform float NEAR;
 uniform float FAR;
 
-// To get the angle for the phase function
-uniform vec4 CAM_POS;
-uniform vec4 LIGHT_DIR;
+// Directional light props
+uniform vec4 DIRECT_LIGHT_DIR;
+uniform vec4 DIRECT_LIGHT_COLOR;
+uniform float DIRECT_LIGHT_INTENSITY;
+uniform bool DIRECT_LIGHT_ENABLED;
+uniform sampler2DShadow DIRECT_LIGHT_SHADOW_MAP;
+uniform mat4 DIRECT_LIGHT_SPACE_MAT;
 
-// To sample shadow map
-uniform mat4 LIGHT_SPACE_MAT;
+// Point light shadow maps
+uniform samplerCube POINT_LIGHT_1_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_2_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_3_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_4_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_5_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_6_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_7_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_8_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_9_SHADOW_MAP;
+uniform samplerCube POINT_LIGHT_10_SHADOW_MAP;
 
-uniform vec4 LIGHT_COLOR;
-
-// Variable params
+// Fog props
 uniform float ANISOTROPY;
 uniform vec3 SCATTERING;
 uniform float ABSORPTION;
 uniform float DENSITY;
-uniform float LIGHT_INTENSITY;
+
+// Other props
 uniform float AMBIENT_LIGHT_STRENGTH;
 uniform int NUM_SAMPLES_PER_VOXEL;
 uniform int VOL_ACTIVE;
 
+const int NUM_LIGHTS = 10;
 
-vec3 id_to_world_with_jitter(ivec3 id, float jitter, float n, float f, float depth_power, mat4 inv_vp);
+layout(std430, binding = 1) buffer Buff1 {
+    vec4 positions[NUM_LIGHTS];
+};
+layout(std430, binding = 2) buffer Buff2 {
+    vec4 colors[NUM_LIGHTS];
+};
+layout(std430, binding = 3) buffer Buff3 {
+    float intensities[NUM_LIGHTS];
+};
+layout(std430, binding = 4) buffer Buff4 {
+    float maxRanges[NUM_LIGHTS];
+};
+layout(std430, binding = 5) buffer Buff5 {
+    bool enableds[NUM_LIGHTS];
+};
 
 float jitter[32] = {
     0.375, 0.4375,
@@ -58,27 +83,75 @@ float jitter[32] = {
     0.625, 0.8125
 };
 
+vec3 id_to_world_with_jitter(ivec3 id, float jitter, float n, float f, float depth_power, mat4 inv_vp);
+vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
 
 float camLightAngle(vec4 worldPos) {
     vec4 froxelCamDir = normalize(CAM_POS - worldPos);
-    vec4 froxelLightDir = normalize(-LIGHT_DIR);
+    vec4 froxelLightDir = normalize(-DIRECT_LIGHT_DIR);
 
     return acos(dot(froxelLightDir, froxelCamDir));
 }
 
+float henyeyGreenstein(vec4 worldPos, vec4 camPos, vec4 lightDir, float g) {
+    vec4 pointCamDir = normalize(camPos - worldPos);
+    vec4 pointLightDir = normalize(lightDir);
 
-float henyeyGreenstein(vec4 worldPos, float g) {
-    vec4 froxelCamDir = normalize(CAM_POS - worldPos);
-    vec4 froxelLightDir = normalize(LIGHT_DIR);
-
-    float cosAngle = dot(froxelCamDir, froxelLightDir);
+    float cosAngle = dot(pointCamDir, pointLightDir);
     float denom = 4*PI * pow((1+g*g - 2*g*cosAngle), 3/2);
     return (1-g*g) / denom;
 }
 
-float sampleShadowMap(vec4 worldPos) {
-    vec4 projShadowCoord = LIGHT_SPACE_MAT * worldPos;
-    return textureProj(SHADOW_MAP, projShadowCoord / projShadowCoord.w);
+float isotropicPhase() {
+    return 1/(4*3.14159);
+}
+
+vec2 directLightLuminance(vec4 worldPos) {
+    vec4 lightSpacePos = DIRECT_LIGHT_SPACE_MAT * worldPos;
+    float shadow = textureProj(DIRECT_LIGHT_SHADOW_MAP, lightSpacePos);
+
+    return vec2(shadow * (1-AMBIENT_LIGHT_STRENGTH), AMBIENT_LIGHT_STRENGTH);
+}
+
+float sampleCorrectShadowMap(int lightID, vec3 rayDir){
+    switch (lightID) {
+        case 0:
+            return texture(POINT_LIGHT_1_SHADOW_MAP, rayDir).r;
+        case 1:
+            return texture(POINT_LIGHT_2_SHADOW_MAP, rayDir).r;
+        case 2:
+            return texture(POINT_LIGHT_3_SHADOW_MAP, rayDir).r;
+        case 3:
+            return texture(POINT_LIGHT_4_SHADOW_MAP, rayDir).r;
+        case 4:
+            return texture(POINT_LIGHT_5_SHADOW_MAP, rayDir).r;
+        case 5:
+            return texture(POINT_LIGHT_6_SHADOW_MAP, rayDir).r;
+        case 6:
+            return texture(POINT_LIGHT_7_SHADOW_MAP, rayDir).r;
+        case 7:
+            return texture(POINT_LIGHT_8_SHADOW_MAP, rayDir).r;
+        case 8:
+            return texture(POINT_LIGHT_9_SHADOW_MAP, rayDir).r;
+        case 9:
+            return texture(POINT_LIGHT_10_SHADOW_MAP, rayDir).r;
+        default:
+            return 0.0;
+    }
+}
+
+vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange, int lightID) {
+    vec3 fragLightDir = (worldPos - lightPos).xyz;
+    float currentDepth = length(fragLightDir);
+
+    float closestDepth = sampleCorrectShadowMap(lightID, fragLightDir);
+    closestDepth *= FAR;
+
+    float bias = 0.05;
+    float shadow = currentDepth - bias <= closestDepth ? 1.0 : 0.0;
+    float attenuation = max(0.0, (pow(maxRange, (maxRange-currentDepth)/maxRange)) / maxRange);
+
+    return vec2(shadow * (1-AMBIENT_LIGHT_STRENGTH), AMBIENT_LIGHT_STRENGTH) * attenuation ;
 }
 
 bool sdfCube(vec4 worldPos, vec4 center, float lengthX, float lengthY, float lengthZ) {
@@ -105,21 +178,9 @@ bool sampleMedia(vec4 worldPos){
     return homogeneousMedia();//sdfCube(worldPos, vec4(0,500.0,0.0,1.0), 500.0, 800.0, 500.0) || sdfSphere(worldPos, vec4(0.0,2000.0,0.0,1.0), 500.0);
 }
 
-float shadowCalc(vec4 worldPos, float extinction) {
-    return sampleShadowMap(worldPos);
-}
-
-
-float z_slice_thickness(int z)
-{
-    return exp(-float(TEX_DIMS.z - z - 1) / float(TEX_DIMS.z));
-}
-
-
 vec3 calcScattering(vec3 scattering, float phase, float inLight, vec4 lightColor, float intensity) {
     return scattering * intensity * phase * inLight * lightColor.rgb;
 }
-
 
 float mean3(vec3 v) {
     return (v.x + v.y + v.z) / 3;
@@ -133,30 +194,39 @@ void main() {
     ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
 
     vec3 lScat = vec3(0);
-    vec3  avgScattering = vec3(0);
-    float avgAbsorption = 0;
-    float avgExtinction = 0;
-    float avgPhase = 0;
-    float avgShadow = 0;
-
+    float extinction = 0.0;
+    float isotropicPhase = isotropicPhase();
     for (int i = 0; i < NUM_SAMPLES_PER_VOXEL; i++) {
         vec4 worldPos = vec4(id_to_world_with_jitter(storeLoc, jitter[i], NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
-        float thickness = z_slice_thickness(storeLoc.z);
-    
         float density = sampleMedia(worldPos) ? DENSITY : 0.0;
-        avgScattering += SCATTERING * density;
-        avgAbsorption += ABSORPTION * density;
-    
-        avgPhase  += henyeyGreenstein(worldPos, ANISOTROPY);
-        avgShadow += sampleShadowMap(worldPos);
+        vec3 scattering = SCATTERING * density;
+        float absorption = ABSORPTION * density;
+        extinction += mean3(scattering) + absorption;
+
+        if (DIRECT_LIGHT_ENABLED) {
+            float phase = henyeyGreenstein(worldPos, CAM_POS, DIRECT_LIGHT_DIR, ANISOTROPY);
+            vec2 luminances = directLightLuminance(worldPos);
+            lScat += calcScattering(scattering, isotropicPhase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
+            lScat += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
+        }
+
+        for (int j = 0; j < NUM_LIGHTS; j++) {
+            vec4 lightPos = positions[j];
+            vec4 lightColor = colors[j];
+            float lightIntensity = intensities[j];
+            float maxRange = maxRanges[j];
+            bool enabled = enableds[j];
+
+            if (enabled) {
+                vec4 worldLightDir = worldPos - lightPos;
+                vec2 luminances = pointLightLuminance(worldPos, lightPos, maxRange, j);
+                float phase = henyeyGreenstein(worldPos, CAM_POS, worldLightDir, ANISOTROPY);
+
+                lScat += calcScattering(scattering, isotropicPhase, luminances.y, lightColor, lightIntensity);
+                lScat += calcScattering(scattering, phase, luminances.x, lightColor, lightIntensity);
+            }
+        }
     }
-    avgScattering /= NUM_SAMPLES_PER_VOXEL;
-    avgAbsorption /= NUM_SAMPLES_PER_VOXEL;
-    avgPhase /= NUM_SAMPLES_PER_VOXEL;
-    avgShadow /= NUM_SAMPLES_PER_VOXEL;
 
-    avgExtinction = mean3(avgScattering) + avgAbsorption;
-
-    lScat = calcScattering(avgScattering, avgPhase, avgShadow, LIGHT_COLOR, LIGHT_INTENSITY);
-    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, avgExtinction));
+    imageStore(SCATTERING_UNIT, storeLoc, vec4(lScat, extinction)/NUM_SAMPLES_PER_VOXEL);
 }

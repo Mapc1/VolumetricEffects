@@ -47,6 +47,25 @@ uniform mat4 V;
 
 const int NUM_LIGHTS = 10;
 
+float jitter[32] = {
+    0.375, 0.4375,
+    0.625, 0.0625,
+    0.875, 0.1875,
+    0.125, 0.0625,
+    0.375, 0.6875,
+    0.875, 0.4375,
+    0.625, 0.5625,
+    0.375, 0.9375,
+    0.625, 0.3125,
+    0.125, 0.5625,
+    0.125, 0.8125,
+    0.375, 0.1875,
+    0.875, 0.9375,
+    0.875, 0.6875,
+    0.125, 0.3125,
+    0.625, 0.8125
+};
+
 in Data {
     vec2 texCoord;
 } Inputs;
@@ -61,9 +80,15 @@ layout(std430, binding = 3) buffer Buff3 {
     float intensities[NUM_LIGHTS];
 };
 layout(std430, binding = 4) buffer Buff4 {
-    float maxRanges[NUM_LIGHTS];
+    float constAtt[NUM_LIGHTS];
 };
 layout(std430, binding = 5) buffer Buff5 {
+    float linearAtt[NUM_LIGHTS];
+};
+layout(std430, binding = 6) buffer Buff6 {
+    float quadAtt[NUM_LIGHTS];
+};
+layout(std430, binding = 7) buffer Buff7 {
     bool enableds[NUM_LIGHTS];
 };
 
@@ -111,7 +136,7 @@ float sampleCorrectShadowMap(int lightID, vec3 rayDir){
     }
 }
 
-vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange, int lightID) {
+vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float const_att, float linear_att, float quad_att, int lightID) {
     vec3 frag_light_dir = (worldPos - lightPos).xyz;
     float current_depth = length(frag_light_dir);
 
@@ -120,7 +145,7 @@ vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange, int light
 
     float bias = 0;
     float shadow = current_depth - bias <= closest_depth ? 1.0 : 0.0;
-    float attenuation = max(0.0, (pow(maxRange, (maxRange-current_depth)/maxRange)) / maxRange);
+    float attenuation = 1.0 / (const_att + linear_att * current_depth + quad_att * (current_depth*current_depth));
 
     return vec2(shadow * (1-AMBIENT_LIGHT_STRENGTH) + AMBIENT_LIGHT_STRENGTH, AMBIENT_LIGHT_STRENGTH) * attenuation ;
 }
@@ -162,12 +187,12 @@ vec4 toneMap(vec4 color, float gamma) {
     return pow(tone_mapped, vec4(1.0 / gamma));
 }
 
-float calcDepth(int stepNum) {
+float calcDepth(int stepNum, float jit) {
     // Exponential depth
-    //return NEAR * pow(FAR/NEAR, (float(stepNum)+0.5) / float(NUM_STEPS));
+    //return NEAR * pow(FAR/NEAR, (float(stepNum)) / float(NUM_STEPS));
 
    // Linear depth
-   return ((FAR -NEAR)/NUM_STEPS) * stepNum;
+   return ((FAR-NEAR)/NUM_STEPS) * (stepNum + jit);
 }
 
 void main() {
@@ -196,13 +221,14 @@ void main() {
 
     float cur_depth = 0.0;
     int cur_step = 1;
-    vec4 cur_world_pos = CAM_POS + vec4(ray_dir,0.0)*calcDepth(cur_step);
+    float jit = jitter[(int(gl_FragCoord.x) * int(gl_FragCoord.y)) % 32] * 2 - 1; 
+    vec4 cur_world_pos = CAM_POS + vec4(ray_dir,0.0)*calcDepth(cur_step, jit);
     while (cur_depth < linear_depth && cur_depth < FAR) {
         float density = DENSITY;
         vec3 scattering = SCATTERING * density;
         float absorption = ABSORPTION * density;
         float extinction = mean3(scattering) + absorption;
-        float stride = calcDepth(cur_step) - cur_depth;
+        float stride = calcDepth(cur_step, jit) - cur_depth;
 
         vec3 in_scattering = vec3(0.0);
         if (DIRECT_LIGHT_ENABLED) {
@@ -216,12 +242,14 @@ void main() {
             vec4 light_pos = positions[i];
             vec4 light_color = colors[i];
             float light_intensity = intensities[i];
-            float max_range = maxRanges[i];
+            float const_att = constAtt[i];
+            float linear_att = linearAtt[i];
+            float quad_att = quadAtt[i];
             bool enabled = enableds[i];
 
             if (enabled) {
                 vec4 world_light_dir = cur_world_pos - light_pos;
-                vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, max_range, i);
+                vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, const_att, linear_att, quad_att, i);
                 float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
 
                 in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity);

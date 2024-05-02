@@ -19,7 +19,19 @@
                 <field value="FLOAT"/>
             </structure>
         </buffer>
-        <buffer name="maxRanges">
+        <buffer name="constAtt">
+            <DIM x="10" y="1" z="1"/>
+            <structure>
+                <field value="FLOAT"/>
+            </structure>
+        </buffer>
+        <buffer name="linearAtt">
+            <DIM x="10" y="1" z="1"/>
+            <structure>
+                <field value="FLOAT"/>
+            </structure>
+        </buffer>
+        <buffer name="quadAtt">
             <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="FLOAT"/>
@@ -43,6 +55,14 @@
                 <color name="albedo" internalFormat="RGBA"/>
                 <color name="skyboxFlag" internalFormat="RGBA"/>
             </colors>
+        </renderTarget>
+
+        <renderTarget name="pointLightIlumination">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="pointLightIlumination" internalFormat="RGBA32F"/>
+            </colors> 
         </renderTarget>
 
         <renderTarget name="scatTrans">
@@ -168,6 +188,10 @@
                   vs="shaders/skybox_gBuffer/skybox_gBuffer.vert"
                   ps="shaders/skybox_gBuffer/skybox_gBuffer.frag"
         />
+        <shader name="pointLightIlumination"
+                  vs="shaders/pointLightIlumination/pointLightIlumination.vert"
+                  ps="shaders/pointLightIlumination/pointLightIlumination.frag"
+        />
         <shader name="scatIntegration"
                   vs="shaders/scatIntegration/scatIntegration.vert"
                   ps="shaders/scatIntegration/scatIntegration.frag"
@@ -192,6 +216,13 @@
     <states>
         <state name="shadow">
             <CULL_TYPE value="FRONT"/>
+        </state>
+        <state name="LightSphere">
+            <CULL_TYPE value="FRONT"/>
+            <DEPTH_TEST value="false"/>
+            <BLEND value="true" />
+            <BLEND_SRC value="SRC_ALPHA" />
+            <BLEND_DST value="ONE" />
         </state>
     </states>
 
@@ -589,6 +620,211 @@
             </shader>
         </material>
 
+        <material name="pointLightIlumination">
+            <shader name="pointLightIlumination">
+                <values>
+                    <valueof uniform   = "DEBUG"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "DEBUG"
+                    />
+                    
+				    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+				             component = "PROJECTION_VIEW_MODEL"
+                    />
+					<valueof uniform   = "V"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+							 component = "VIEW_MATRIX"
+                    />
+					<valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+							 component = "FAR"
+                    />
+
+                    <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "AMBIENT_LIGHT_STRENGTH"
+                    />
+
+                    <!-- GBuffer -->
+                    <valueof uniform   = "POSITION"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                    <valueof uniform   = "NORMAL"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "1"
+                    />
+                    <valueof uniform   = "ALBEDO"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "2"
+                    />
+                    <valueof uniform   = "SKYBOX_FLAG"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "3"
+                    />
+
+                    <!-- Point light shadow maps -->
+                    <valueof uniform   = "POINT_LIGHT_1_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "4"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_2_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "5"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_3_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "6"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_4_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "7"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_5_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "8"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_6_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "9"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_7_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "10"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_8_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "11"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_9_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "12"
+                    />
+                    <valueof uniform   = "POINT_LIGHT_10_SHADOW_MAP"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "13"
+                    />
+                </values>
+            </shader>
+            <state name="LightSphere"/>
+            <textures>
+                <texture name="position"   UNIT="0"/>
+                <texture name="normal"     UNIT="1"/>
+                <texture name="albedo"   UNIT="2"/>
+                <texture name="skyboxFlag" UNIT="3"/>
+                <texture name="pointLightShadowMap1" UNIT="4">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap2" UNIT="5">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap3" UNIT="6">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap4" UNIT="7">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap5" UNIT="8">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap6" UNIT="9">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap7" UNIT="10">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap8" UNIT="11">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap9" UNIT="12">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="pointLightShadowMap10" UNIT="13">
+                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
+                    <COMPARE_FUNC value="LEQUAL"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+            <buffers>
+                <buffer name="positions">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="1"/>
+                </buffer>
+                <buffer name="colors">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="2"/>
+                </buffer>
+                <buffer name="intensities">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="3"/>
+                </buffer>
+                <buffer name="constAtt">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="4"/>
+                </buffer>
+                <buffer name="linearAtt">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="5"/>
+                </buffer>
+                <buffer name="quadAtt">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="6"/>
+                </buffer>
+                <buffer name="enableds">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="7"/>
+                </buffer>
+            </buffers>
+        </material>
+
         <material name="scatIntegration">
             <shader name="scatIntegration">
                 <values>
@@ -829,13 +1065,21 @@
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="3"/>
                 </buffer>
-                <buffer name="maxRanges">
+                <buffer name="constAtt">
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="4"/>
                 </buffer>
-                <buffer name="enableds">
+                <buffer name="linearAtt">
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="5"/>
+                </buffer>
+                <buffer name="quadAtt">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="6"/>
+                </buffer>
+                <buffer name="enableds">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="7"/>
                 </buffer>
             </buffers>
         </material>
@@ -844,12 +1088,12 @@
             <shader name="render">
                 <values>
                     <!-- GBuffer -->
-                    <valueof uniform   = "NORMAL"
+                    <valueof uniform   = "POSITION"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "0"
                     />
-                    <valueof uniform   = "POSITION"
+                    <valueof uniform   = "NORMAL"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "1"
@@ -865,16 +1109,22 @@
                              id        = "3"
                     />
 
-                    <!-- Integrated scattering and transmittance -->
-                    <valueof uniform   = "SCATTERING"
+                    <valueof uniform   = "POINT_LIGHT_ILUMINATION"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "4"
                     />
-                    <valueof uniform   = "TRANSMITTANCE"
+
+                    <!-- Integrated scattering and transmittance -->
+                    <valueof uniform   = "SCATTERING"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
                              id        = "5"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "6"
                     />
 
                     <!-- Directional light props -->
@@ -906,59 +1156,7 @@
                     <valueof uniform   = "DIRECT_LIGHT_SHADOW_MAP"
                              type      = "TEXTURE_BINDING"
                              component = "UNIT"
-                             id        = "6"
-                    />
-
-                    <!-- Point light shadow maps -->
-                    <valueof uniform   = "POINT_LIGHT_1_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
                              id        = "7"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_2_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "8"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_3_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "9"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_4_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "10"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_5_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "11"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_6_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "12"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_7_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "13"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_8_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "14"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_9_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "15"
-                    />
-                    <valueof uniform   = "POINT_LIGHT_10_SHADOW_MAP"
-                             type      = "TEXTURE_BINDING"
-                             component = "UNIT"
-                             id        = "16"
                     />
                     
                     <!-- Other props -->
@@ -966,11 +1164,6 @@
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "VIEW_MATRIX"
-                    />
-                    <valueof uniform   = "FAR"
-                             type      = "CAMERA"
-                             context   = "MainCamera"
-                             component = "FAR"
                     />
                     <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
                              type      = "RENDERER"
@@ -980,101 +1173,20 @@
                 </values>
             </shader>
             <textures>
-                <texture name="normal"     UNIT="0"/>
-                <texture name="position"   UNIT="1"/>
+                <texture name="position"   UNIT="0"/>
+                <texture name="normal"     UNIT="1"/>
                 <texture name="albedo"     UNIT="2"/>
                 <texture name="skyboxFlag" UNIT="3"/>
-                <texture name="scattering" UNIT="4"/>
-                <texture name="transmittance" UNIT="5"/>
-                <texture name="shadowMap"  UNIT="6">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap1" UNIT="7">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap2" UNIT="8">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap3" UNIT="9">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap4" UNIT="10">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap5" UNIT="11">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap6" UNIT="12">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap7" UNIT="13">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap8" UNIT="14">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap9" UNIT="15">
-                    <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
-                    <COMPARE_FUNC value="LEQUAL"/>
-                    <MIN_FILTER value="LINEAR"/>
-                    <MAG_FILTER value="LINEAR"/>
-                </texture>
-                <texture name="pointLightShadowMap10" UNIT="16">
+                <texture name="pointLightIlumination" UNIT="4"/>
+                <texture name="scattering" UNIT="5"/>
+                <texture name="transmittance" UNIT="6"/>
+                <texture name="shadowMap"  UNIT="7">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
             </textures>
-            <buffers>
-                <buffer name="positions">
-                    <TYPE value="SHADER_STORAGE"/>
-                    <BINDING_POINT value="1"/>
-                </buffer>
-                <buffer name="colors">
-                    <TYPE value="SHADER_STORAGE"/>
-                    <BINDING_POINT value="2"/>
-                </buffer>
-                <buffer name="intensities">
-                    <TYPE value="SHADER_STORAGE"/>
-                    <BINDING_POINT value="3"/>
-                </buffer>
-                <buffer name="maxRanges">
-                    <TYPE value="SHADER_STORAGE"/>
-                    <BINDING_POINT value="4"/>
-                </buffer>
-                <buffer name="enableds">
-                    <TYPE value="SHADER_STORAGE"/>
-                    <BINDING_POINT value="5"/>
-                </buffer>
-            </buffers>
         </material>
 
         <!-- DEBUG materials -->

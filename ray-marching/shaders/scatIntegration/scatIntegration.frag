@@ -47,23 +47,12 @@ uniform mat4 V;
 
 const int NUM_LIGHTS = 10;
 
-float jitter[32] = {
-    0.375, 0.4375,
-    0.625, 0.0625,
-    0.875, 0.1875,
-    0.125, 0.0625,
-    0.375, 0.6875,
-    0.875, 0.4375,
-    0.625, 0.5625,
-    0.375, 0.9375,
-    0.625, 0.3125,
-    0.125, 0.5625,
-    0.125, 0.8125,
-    0.375, 0.1875,
-    0.875, 0.9375,
-    0.875, 0.6875,
-    0.125, 0.3125,
-    0.625, 0.8125
+// Dither patter found in GPU Pro 5 page 134
+float jitter[4][4] = {
+    {0,     0.5,  0.125,  0.625},
+    {0.75, 0.25,  0.875, 0.375},
+    {0.1875,  0.6875, 0.0625,  0.5625},
+    {0.9375, 0.4375,  0.8125, 0.3125}
 };
 
 in Data {
@@ -182,17 +171,19 @@ vec4 accumulateScatTrans(vec3 in_scattering, float extinction, vec3 accum_scatte
     return vec4(accum_scattering,accum_transmittance);
 }
 
-vec4 toneMap(vec4 color, float gamma) {
-    vec4 tone_mapped = color / (color + vec4(1.0));
-    return pow(tone_mapped, vec4(1.0 / gamma));
-}
-
 float calcDepth(int stepNum, float jit) {
     // Exponential depth
-    //return NEAR * pow(FAR/NEAR, (float(stepNum)) / float(NUM_STEPS));
+    return NEAR * pow(FAR/NEAR, (float(stepNum + jit)) / float(NUM_STEPS));
 
    // Linear depth
-   return ((FAR-NEAR)/NUM_STEPS) * (stepNum + jit);
+//   return ((FAR-NEAR)/NUM_STEPS) * (stepNum + jit);
+}
+
+float screenCoordToJitter(vec2 screenCoord) {
+    int x = int(mod(screenCoord.x, 4));
+    int y = int(mod(screenCoord.y, 4));
+
+    return jitter[x][y] * 2 - 1;
 }
 
 void main() {
@@ -221,7 +212,7 @@ void main() {
 
     float cur_depth = 0.0;
     int cur_step = 1;
-    float jit = jitter[(int(gl_FragCoord.x) * int(gl_FragCoord.y)) % 32] * 2 - 1; 
+    float jit = screenCoordToJitter(gl_FragCoord.xy); 
     vec4 cur_world_pos = CAM_POS + vec4(ray_dir,0.0)*calcDepth(cur_step, jit);
     while (cur_depth < linear_depth && cur_depth < FAR) {
         float density = DENSITY;

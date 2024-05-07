@@ -297,6 +297,20 @@
                 <renderTarget name="scatTrans" fromLibrary="RayMarching"/>
             </pass>
 
+            <pass class="quad" name="gaussianBlurHorizontal">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="gaussianBlurHorizontal" fromLibrary="RayMarching"/>
+                <renderTarget name="step1BlurScatTrans" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="gaussianBlurVertical">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="gaussianBlurVertical" fromLibrary="RayMarching"/>
+                <renderTarget name="finalBlurScatTrans" fromLibrary="RayMarching"/>
+            </pass>
+
             <pass class="default" name="PointLightPass">
                 <scenes instances="10">
                     <scene name="LightSphere"/>

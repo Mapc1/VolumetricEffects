@@ -74,6 +74,24 @@
             </colors>
         </renderTarget>
 
+        <renderTarget name="step1BlurScatTrans">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="step1BlurScattering" internalFormat="RGBA32F"/>
+                <color name="step1BlurTransmittance" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+
+        <renderTarget name="finalBlurScatTrans">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="finalBlurScattering" internalFormat="RGBA32F"/>
+                <color name="finalBlurTransmittance" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+
         <renderTarget name="shadowMap">
             <SIZE width="4096" height="4096"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
@@ -195,6 +213,14 @@
         <shader name="scatIntegration"
                   vs="shaders/scatIntegration/scatIntegration.vert"
                   ps="shaders/scatIntegration/scatIntegration.frag"
+        />
+        <shader name="gaussianBlurHorizontal"
+                  vs="shaders/gaussianBlur/gaussianBlur.vert"
+                  ps="shaders/gaussianBlur/gaussianBlurHorizontal.frag"
+        />
+        <shader name="gaussianBlurVertical"
+                  vs="shaders/gaussianBlur/gaussianBlur.vert"
+                  ps="shaders/gaussianBlur/gaussianBlurVertical.frag"
         />
         <shader name="render"
                   vs="shaders/render/render.vert"
@@ -1084,6 +1110,62 @@
             </buffers>
         </material>
 
+        <material name="gaussianBlurHorizontal">
+            <shader name="gaussianBlurHorizontal">
+                <values>
+                    <valueof uniform   = "SCATTERING"
+                             type      = "TEXTURE_BINDING"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="scattering">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture UNIT="1" name="transmittance">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+        </material>
+
+        <material name="gaussianBlurVertical">
+            <shader name="gaussianBlurVertical">
+                <values>
+                    <valueof uniform   = "SCATTERING"
+                             type      = "TEXTURE_BINDING"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="step1BlurScattering">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture UNIT="1" name="step1BlurTransmittance">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+        </material>
+
         <material name="render">
             <shader name="render">
                 <values>
@@ -1178,8 +1260,8 @@
                 <texture name="albedo"     UNIT="2"/>
                 <texture name="skyboxFlag" UNIT="3"/>
                 <texture name="pointLightIlumination" UNIT="4"/>
-                <texture name="scattering" UNIT="5"/>
-                <texture name="transmittance" UNIT="6"/>
+                <texture name="finalBlurScattering" UNIT="5"/>
+                <texture name="finalBlurTransmittance" UNIT="6"/>
                 <texture name="shadowMap"  UNIT="7">
                     <COMPARE_MODE value="COMPARE_REF_TO_TEXTURE"/>
                     <COMPARE_FUNC value="LEQUAL"/>

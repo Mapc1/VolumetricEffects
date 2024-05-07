@@ -2,10 +2,11 @@
 
 #define TEX_DIMS ivec3(160,90,128)
 
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 // Output texture
 uniform writeonly image3D INTEGRATION_UNIT;
+uniform writeonly image3D HISTORY_UNIT;
 
 uniform sampler3D SCATTERING_UNIT;
 
@@ -56,5 +57,8 @@ void main() {
         accumScattering = accumulateScattering(i, accumScattering.rgb, accumScattering.a, froxelScattering, froxelExtinction);
 
         imageStore(INTEGRATION_UNIT, storeLoc, accumScattering);
+
+        // Write new scatExtinction texture into history texture
+        imageStore(HISTORY_UNIT, storeLoc, scatExtinction);
     }
 }

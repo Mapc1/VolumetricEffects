@@ -131,7 +131,23 @@
     </renderTargets>
 
     <textures>
+        <texture name="densityTex">
+            <WIDTH value="256"/>
+            <HEIGHT value="256"/>
+            <DEPTH value="256"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+
         <texture name="scatteringTex">
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="128"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+        
+        <texture name="historyTex">
             <WIDTH value="160"/>
             <HEIGHT value="90"/>
             <DEPTH value="128"/>
@@ -167,6 +183,12 @@
                   gs="shaders/pointLightShadowMap/pointLightShadowMap.geom"
                   ps="shaders/pointLightShadowMap/pointLightShadowMap.frag"
         />
+        <shader name="genDensityNoise">
+            <cs>
+                <file name="shaders/compute/genDensityNoise.comp"/>
+                <file name="shaders/utils/perlinNoise3D.glsl"/>
+            </cs>
+        </shader>
         <shader name="calcScattering">
             <cs>
                 <file name="shaders/compute/calcScattering.comp"/>
@@ -230,6 +252,26 @@
                     />
                 </values>
             </shader>
+        </material>
+
+        <material name="genDensityNoise">
+            <shader name="genDensityNoise">
+                <values>
+                    <!-- Output texture -->
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <imageTextures>
+                <imageTexture UNIT="0" texture="densityTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures> 
         </material>
         
         <material name="pointLightShadowMap1">
@@ -555,11 +597,6 @@
         <material name="calcScattering">
             <shader name="calcScattering">
                 <values>
-                    <valueof uniform   = "NUM_SAMPLES_PER_VOXEL"
-                             type      = "STATE"
-                             context   = "CURRENT"
-                             component = "NUM_SAMPLES_PER_VOXEL" 
-                    />
                     <valueof uniform   = "VOL_ACTIVE"
                              type      = "RENDERER"
                              context   = "CURRENT"
@@ -569,6 +606,20 @@
                              type      = "LIGHT"
                              context   = "Sun"
                              component = "AMBIENT_LIGHT_STRENGTH"
+                    />
+
+                    <!-- Input textures -->
+                    <valueof uniform   = "HISTORY_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "11"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "12"
+                             component = "UNIT"
                     />
 
                     <!-- Output texture -->
@@ -601,11 +652,28 @@
                              component = "DENSITY"
                     />
 
+                    <valueof uniform   = "FRAME_COUNT"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "FRAME_COUNT"
+                    />
+
+                    <valueof uniform   = "HOMOGENEOUS_MEDIA"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "HOMOGENEOUS_MEDIA"
+                    />
+
                     <!-- Camera props -->
                     <valueof uniform   = "INV_VIEW_MAT"
                              type      = "CAMERA"
                              context   = "MainCamera"
                              component = "VIEW_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "PREV_PROJ_VIEW_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "PREV_PROJ_VIEW_MAT"
                     />
                     <valueof uniform   = "INV_PROJ_MAT"
                              type      = "CAMERA"
@@ -781,6 +849,20 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
+                <texture name="historyTex" UNIT="11">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="densityTex" UNIT="12">
+                    <WRAP_S value="MIRRORED_REPEAT"/>
+                    <WRAP_R value="MIRRORED_REPEAT"/>
+                    <WRAP_T value="MIRRORED_REPEAT"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
             <imageTextures>
                 <imageTexture UNIT="1" texture="scatteringTex">
@@ -827,6 +909,12 @@
                              id        = "1"
                              component = "UNIT"
                     />
+                    <valueof uniform   = "HISTORY_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "2"
+                             component = "UNIT"
+                    />
                     <valueof uniform   = "NEAR"
                              type      = "CAMERA"
                              context   = "MainCamera"
@@ -846,12 +934,19 @@
             </shader>
             <textures>
                 <texture UNIT="0" name="scatteringTex">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
             </textures>
             <imageTextures>
                 <imageTexture UNIT="1" texture="integrationTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+                <imageTexture UNIT="2" texture="historyTex">
                     <ACCESS value="WRITE_ONLY"/>
                     <LEVEL value="0"/>
                 </imageTexture>
@@ -1048,6 +1143,11 @@
                              type      = "RENDERER"
                              context   = "CURRENT"
                              component = "PROJECTION_VIEW_MODEL"
+                    />
+                    <valueof uniform   = "PV"
+                             type      = "CAMERA"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MATRIX"
                     />
                     <valueof uniform   = "V"
                              type      = "RENDERER"

@@ -7,7 +7,7 @@ uniform sampler2D TEX_UNIT;
 uniform sampler3D INTEGRATION_UNIT;
 
 // Camera and renderer props
-uniform mat4 V, P;
+uniform mat4 PV, V;
 uniform float NEAR;
 uniform float FAR;
 
@@ -70,7 +70,7 @@ float shadowIlumination(vec3 normal, vec3 lightDir) {
     // If the surface is facing away from the light we don't add any illumination    
     float NdotL = max(0.0, dot(normal, lightDir));
     if (NdotL <= 0.01) {
-        return 0.0;
+        return AMBIENT_LIGHT_STRENGTH;
     }
 
     float shadow = 0.0;
@@ -163,8 +163,7 @@ void main() {
     }
 
     if (VOL_ACTIVE == 0) {
-        vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, P*V);
-        uvw.z = min(uvw.z,1.0);
+        vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, PV);
 
         vec4 scatTransmittance = textureTricubic(INTEGRATION_UNIT, uvw);
         vec3 inScattering = scatTransmittance.rgb;

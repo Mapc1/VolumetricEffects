@@ -6,11 +6,12 @@
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
             <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
+            <attribute type="STATE" name="HOMOGENEOUS_MEDIA" data="INT" value="0"/>
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="5"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="500.0"/>
-            <attribute type="STATE" name="NUM_SAMPLES_PER_VOXEL" data="INT" value="32"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
+            <attribute type="CAMERA" name="PREV_PROJ_VIEW_MAT" data="MAT4"/>
         </attributes>
         <scenes>
             <scene name="Sponza" filename="..\models\sponza\sponza.obj"/>
@@ -231,6 +232,11 @@
                 </materialMaps>
             </pass>
 
+            <pass class="compute" name="GenDensityNoise">
+                <mode value="RUN_ONCE"/>
+                <material name="genDensityNoise" fromLibrary="Froxels" dimX="256" dimY="256" dimZ="256"/>
+            </pass>
+
             <pass class="compute" name="CalcScattering">
                 <preScript file="scripts/light_loading.lua" script="lights"/>
                 <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="128"/>
@@ -249,7 +255,7 @@
                 <lights>
                     <light name="Sun"/>
                 </lights>
-
+                <postScript file="scripts/temporal_matrix_set.lua" script="tms"/>
                 <injectionMaps>
                     <map toMaterial="*">
                         <shader fromMaterial="render" fromLibrary="Froxels" />
@@ -277,6 +283,9 @@
                         </buffers>
                         <textures>
                             <texture name="integrationTex" fromLibrary="Froxels" toUnit="2">
+                                <WRAP_S value="CLAMP_TO_EDGE"/>
+                                <WRAP_R value="CLAMP_TO_EDGE"/>
+                                <WRAP_T value="CLAMP_TO_EDGE"/>
                                 <MIN_FILTER value="LINEAR"/>
                                 <MAG_FILTER value="LINEAR"/>
                             </texture>
@@ -359,7 +368,6 @@
     <interface>
         <window label="settings">
             <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
-            <var label="Samples per voxel" type="STATE" context="Froxels::calcScattering" component="NUM_SAMPLES_PER_VOXEL" def="min=1 max=32"/>
             <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
         </window>
         <window label="Fog">
@@ -367,6 +375,7 @@
             <var label="Scattering" type="STATE" context="Froxels::calcScattering" component="SCATTERING" def="min=0 max=1"/>
             <var label="Absorption" type="STATE" context="Froxels::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
             <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=0.1"/>
+            <var label="Homogeneous media" type="STATE" context="Froxels::calcScattering" component="HOMOGENEOUS_MEDIA" strings="True,False"/>
         </window>
         <window label="Directional light properties">
             <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>

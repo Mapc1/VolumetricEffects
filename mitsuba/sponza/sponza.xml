@@ -48,7 +48,7 @@
 	
 	<shape type="cube">
 		<transform name="to_world">
-			<scale x="3000" y="1000" z="3000"/>
+			<scale x="3000" y="3000" z="3000"/>
 		</transform>
 		<bsdf type="null"/>
 		<ref name="interior" id="fog"/>
@@ -56,7 +56,7 @@
 
 	<emitter type="directional">
 		<vector name="direction" value="0.5, -0.7, 0.4"/>
-		<rgb name="irradiance" value="5"/>
+		<rgb name="irradiance" value="50"/>
 		<ref id="fog"/>
 	</emitter>
 

@@ -7,10 +7,11 @@
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
             <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
-            <attribute type="STATE" name="SKYBOX_FAR" data="INT" value="3500"/>
+            <attribute type="STATE" name="HOMOGENEOUS_MEDIA" data="INT" value="0"/>
+            <attribute type="STATE" name="SKYBOX_FAR" data="INT" value="7000"/>
             <attribute type="RENDERER" name="DEBUG" data="INT" value="1"/>
 
-            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="5"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
 
             <attribute type="RENDERER" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
@@ -43,6 +44,10 @@
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
                 <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="7000.0"/>
+                <!-- 
+                <VIEW x="-0.958" y="0.286" z="0"/>
+                <POSITION x="1031" y="1415" z="-67"/>
+                -->
                 <POSITION x="900" y="500" z="500"/>
                 <LOOK_AT_POINT x="600" y="800" z="-400"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
@@ -239,6 +244,7 @@
             </pass>
 
             <pass class="default" name="genPointLightShadowMap8">
+                <mode value="RUN_ONCE"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
@@ -270,8 +276,13 @@
                 </materialMaps>
             </pass>
 
+            <pass class="compute" name="GenDensityNoise">
+                <mode value="RUN_ONCE"/>
+                <material name="genDensityNoise" fromLibrary="RayMarching" dimX="256" dimY="256" dimZ="256"/>
+            </pass>
+
             <pass class="default" name="gBuffer">
-                <preScript file="scripts/light_loading.lua" script="lights"/>
+                <!--<preScript file="scripts/light_loading.lua" script="lights"/>-->
                 <viewport name="MainViewport"/>
                 <scenes>
                     <scene name="Sponza"/>
@@ -310,7 +321,7 @@
                 <material name="gaussianBlurVertical" fromLibrary="RayMarching"/>
                 <renderTarget name="finalBlurScatTrans" fromLibrary="RayMarching"/>
             </pass>
-
+            <!--
             <pass class="default" name="PointLightPass">
                 <scenes instances="10">
                     <scene name="LightSphere"/>
@@ -323,7 +334,7 @@
                     <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightIlumination"/>
                 </materialMaps>
             </pass>
-
+        -->            
             <pass class="quad" name="render">
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>
@@ -427,6 +438,7 @@
             <var label="Scattering" type="STATE" context="RayMarching::scatIntegration" component="SCATTERING" def="min=0 max=1"/>
             <var label="Absorption" type="STATE" context="RayMarching::scatIntegration" component="ABSORPTION" def="min=0.001 max=1"/>
             <var label="Density" type="STATE" context="RayMarching::scatIntegration" component="DENSITY" def="min=0.001 max=0.1"/>
+            <var label="Homogeneous media" type="STATE" context="RayMarching::scatIntegration" component="HOMOGENEOUS_MEDIA" strings="True,False"/>
         </window>
         <window label="Directional light properties">
             <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>

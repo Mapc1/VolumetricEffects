@@ -93,7 +93,7 @@
         </renderTarget>
 
         <renderTarget name="shadowMap">
-            <SIZE width="4096" height="4096"/>
+            <SIZE width="2048" height="2048"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
 
@@ -188,7 +188,23 @@
         </renderTarget>
     </renderTargets>
 
+    <textures>
+        <texture name="densityTex">
+            <WIDTH value="256"/>
+            <HEIGHT value="256"/>
+            <DEPTH value="256"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+    </textures>
+
     <shaders>
+        <shader name="genDensityNoise">
+            <cs>
+                <file name="../common_shaders/genDensityNoise.comp"/>
+                <file name="../common_shaders/perlinNoise3D.glsl"/>
+            </cs>
+        </shader>
         <shader name="shadowMap"
                   vs="shaders/shadow_map/shadowMap.vert"
                   ps="shaders/shadow_map/shadowMap.frag"
@@ -210,10 +226,15 @@
                   vs="shaders/pointLightIlumination/pointLightIlumination.vert"
                   ps="shaders/pointLightIlumination/pointLightIlumination.frag"
         />
-        <shader name="scatIntegration"
-                  vs="shaders/scatIntegration/scatIntegration.vert"
-                  ps="shaders/scatIntegration/scatIntegration.frag"
-        />
+        <shader name="scatIntegration">
+            <vs>
+                <file name="shaders/scatIntegration/scatIntegration.vert"/>
+            </vs>
+            <ps>
+                <file name="shaders/scatIntegration/scatIntegration.frag"/>
+                <file name="../common_shaders/mediaSampling.glsl"/>
+            </ps>
+        </shader>
         <shader name="gaussianBlurHorizontal"
                   vs="shaders/gaussianBlur/gaussianBlur.vert"
                   ps="shaders/gaussianBlur/gaussianBlurHorizontal.frag"
@@ -253,6 +274,26 @@
     </states>
 
     <materials>
+        <material name="genDensityNoise">
+            <shader name="genDensityNoise">
+                <values>
+                    <!-- Output texture -->
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <imageTextures>
+                <imageTexture UNIT="0" texture="densityTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures> 
+        </material>
+        
         <material name="shadowMap">
             <shader name="shadowMap">
                 <values>
@@ -865,6 +906,11 @@
                              context   = "CURRENT"
                              component = "VOL_ACTIVE"
                     />
+                    <valueof uniform   = "FRAME_COUNT"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "FRAME_COUNT"
+                    />
 
                     <!-- GBuffer -->
                     <valueof uniform   = "POSITION"
@@ -893,6 +939,16 @@
                              type      = "STATE"
                              context   = "CURRENT"
                              component = "DENSITY"
+                    />
+                    <valueof uniform   = "HOMOGENEOUS_MEDIA"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "HOMOGENEOUS_MEDIA"
+                    />
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "12"
                     />
 
                     <!-- Directional light props -->
@@ -1077,6 +1133,13 @@
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
+                <texture name="densityTex" UNIT="12">
+                    <WRAP_S value="MIRRORED_REPEAT"/>
+                    <WRAP_R value="MIRRORED_REPEAT"/>
+                    <WRAP_T value="MIRRORED_REPEAT"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
             </textures>
             <buffers>
                 <buffer name="positions">
@@ -1128,10 +1191,16 @@
             </shader>
             <textures>
                 <texture UNIT="0" name="scattering">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>
                 <texture UNIT="1" name="transmittance">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
                     <MIN_FILTER value="LINEAR"/>
                     <MAG_FILTER value="LINEAR"/>
                 </texture>

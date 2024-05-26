@@ -102,7 +102,6 @@ float pointLightLuminance(vec3 normal, vec4 worldPos, int lightID) {
     float luminance = n_dot_l * shadow * (1-AMBIENT_LIGHT_STRENGTH) + AMBIENT_LIGHT_STRENGTH;
 
     float attenuation = 1.0 / (const_att + linear_att * current_depth + quad_att * (current_depth*current_depth));
-    //max(0.0, (pow(maxRange, (maxRange-current_depth)/maxRange))/maxRange);
 
     return luminance * attenuation * intensity;
 }

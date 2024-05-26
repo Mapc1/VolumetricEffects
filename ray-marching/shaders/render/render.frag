@@ -50,9 +50,9 @@ float directLightLuminance(vec3 normal, vec3 lightDir, vec4 world_pos) {
     return n_dot_l * (shadow/9) * (1-AMBIENT_LIGHT_STRENGTH) + AMBIENT_LIGHT_STRENGTH;
 }
 
-vec4 toneMap(vec4 color, float gamma) {
-    vec4 tone_mapped = color / (color + vec4(1.0));
-    return tone_mapped; //pow(tone_mapped, vec4(1.0 / gamma));
+vec3 toneMap(vec3 color, float gamma) {
+    vec3 tone_mapped = color / (color + vec3(1.0));
+    return pow(tone_mapped, vec3(1.0 / gamma));
 }
 
 void main() {
@@ -71,17 +71,19 @@ void main() {
         // Directional light lighting
         if (DIRECT_LIGHT_ENABLED) {
             float luminance = directLightLuminance(normal, light_dir, world_position);
-            color += albedo * DIRECT_LIGHT_COLOR * luminance * DIRECT_LIGHT_INTENSITY;
+            color += albedo * DIRECT_LIGHT_COLOR * luminance;
         }
 
-        vec4 ilumination = texture(POINT_LIGHT_ILUMINATION, Inputs.texCoord);
-        color += ilumination;
+        //vec4 ilumination = texture(POINT_LIGHT_ILUMINATION, Inputs.texCoord);
+        //color += ilumination;
     }
 
     vec3 scattering = texture(SCATTERING, Inputs.texCoord).rgb;
     float transmittance = texture(TRANSMITTANCE, Inputs.texCoord).r;
 
+    scattering = toneMap(scattering, GAMMA);
+
     color.rgb = color.rgb * transmittance + scattering;
 
-    FragColor = toneMap(color, GAMMA);
+    FragColor = color;
 }

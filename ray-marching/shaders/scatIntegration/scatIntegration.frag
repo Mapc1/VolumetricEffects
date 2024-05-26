@@ -14,6 +14,7 @@ uniform float ANISOTROPY;
 uniform vec3 SCATTERING;
 uniform float ABSORPTION;
 uniform float DENSITY;
+uniform int HOMOGENEOUS_MEDIA;
 
 // Directional light props
 uniform vec4 DIRECT_LIGHT_DIR;
@@ -44,8 +45,20 @@ uniform float FAR;
 
 // Renderer props
 uniform mat4 V;
+uniform uint FRAME_COUNT; 
+
+uniform sampler3D DENSITY_UNIT;
 
 const int NUM_LIGHTS = 10;
+
+// For density texture
+const vec3 DENSITY_TEX_DIMS = vec3(256,256,256);
+const vec4 MIN = vec4(-3000,-3000,-3000,1.0);
+const vec4 MAX = vec4(3000,3000,3000,1.0);
+
+// Density texture stride
+vec3 WIND = vec3(1.0,0.0,0.0);
+float WIND_SPEED = 0.0002;
 
 // Dither patter found in GPU Pro 5 page 134
 float jitter[4][4] = {
@@ -84,6 +97,7 @@ layout(std430, binding = 7) buffer Buff7 {
 layout (location = 0) out vec4 accum_scattering;
 layout (location = 1) out vec4 accum_transmittance;
 
+float sampleMedia(vec4 worldPos, bool isHomogeneousMedia, vec4 minPos, vec4 maxPos, vec3 windOffset, sampler3D densityTexture);
 
 float henyeyGreenstein(vec4 world_pos, vec4 cam_pos, vec4 light_dir, float g) {
     vec4 point_cam_dir = normalize(cam_pos - world_pos);
@@ -171,19 +185,63 @@ vec4 accumulateScatTrans(vec3 in_scattering, float extinction, vec3 accum_scatte
     return vec4(accum_scattering,accum_transmittance);
 }
 
-float calcDepth(int stepNum, float jit) {
-    // Exponential depth
-    return NEAR * pow(FAR/NEAR, (float(stepNum + jit)) / float(NUM_STEPS));
+//////////////////////////////////////////////////////////////////
+//
+//       In-scattering and volumetric shadows calculation
+//
+//////////////////////////////////////////////////////////////////
+float getDirectLightVolumetricTransmittance(vec4 worldPos, vec4 minPos, vec4 maxPos, vec3 windOffset) {
+    float transmittance = 1.0;
+    vec4 curWorldPos = worldPos;
+    vec4 stride = vec4(-DIRECT_LIGHT_DIR.xyz,0.0) * ((MAX.y-worldPos.y)/16);
+    float strideLen = length(stride);
 
-   // Linear depth
-//   return ((FAR-NEAR)/NUM_STEPS) * (stepNum + jit);
+    for (int i = 0; i < 16 && curWorldPos.y < MAX.y; i++) {
+        float density = sampleMedia(curWorldPos, HOMOGENEOUS_MEDIA == 0, minPos, maxPos, windOffset, DENSITY_UNIT) * DENSITY;
+        vec3 scattering = SCATTERING * density;
+        float absorption = ABSORPTION * density;
+        float extinction = mean3(scattering) + absorption;
+        float stepTransmittance = exp(-extinction*strideLen);
+        transmittance *= stepTransmittance;
+        curWorldPos += stride;
+    }
+
+    return transmittance;
+}
+
+float getPointLightVolumetricTransmittance(vec4 worldPos, vec4 lightPos, vec4 minPos, vec4 maxPos, vec3 windOffset) {
+    float transmittance = 1.0;
+    vec4 curWorldPos = worldPos;
+    vec4 strideDir = lightPos-worldPos;
+    float strideLen = length(strideDir)/16;
+    vec4 stride = strideDir * strideLen;
+
+    for (int i = 0; i < 16; i++) {
+        float density = sampleMedia(curWorldPos, HOMOGENEOUS_MEDIA == 0, minPos, maxPos, windOffset, DENSITY_UNIT) * DENSITY;
+        vec3 scattering = SCATTERING * density;
+        float absorption = ABSORPTION * density;
+        float extinction = mean3(scattering) + absorption;
+        float stepTransmittance = exp(-extinction*strideLen);
+        transmittance *= stepTransmittance;
+        curWorldPos += stride;
+    }
+
+    return transmittance;
+}
+
+float calcDepth(int stepNum, float gBufferDepth, float jit) {
+    // Exponential depth
+    //return NEAR * pow(FAR/NEAR, stepNum / float(NUM_STEPS+jit));
+
+    // Linear depth
+    return ((gBufferDepth-NEAR)/NUM_STEPS) * (float(stepNum) + jit);
 }
 
 float screenCoordToJitter(vec2 screenCoord) {
     int x = int(mod(screenCoord.x, 4));
     int y = int(mod(screenCoord.y, 4));
 
-    return jitter[x][y] * 2 - 1;
+    return jitter[x][y] - 0.5 * 0.999;
 }
 
 void main() {
@@ -212,45 +270,48 @@ void main() {
 
     float cur_depth = 0.0;
     int cur_step = 1;
-    float jit = screenCoordToJitter(gl_FragCoord.xy); 
-    vec4 cur_world_pos = CAM_POS + vec4(ray_dir,0.0)*calcDepth(cur_step, jit);
+    float jit = screenCoordToJitter(gl_FragCoord.xy);
+    vec4 cur_world_pos = CAM_POS + vec4(ray_dir*calcDepth(cur_step, linear_depth, jit), 0.0);
+    vec3 wind_offset = FRAME_COUNT * WIND * WIND_SPEED;
     while (cur_depth < linear_depth && cur_depth < FAR) {
-        float density = DENSITY;
-        vec3 scattering = SCATTERING * density;
-        float absorption = ABSORPTION * density;
-        float extinction = mean3(scattering) + absorption;
-        float stride = calcDepth(cur_step, jit) - cur_depth;
+        float density = sampleMedia(cur_world_pos, HOMOGENEOUS_MEDIA == 0, MIN, MAX, wind_offset, DENSITY_UNIT) * DENSITY;
+        float stride = calcDepth(cur_step, linear_depth, jit) - cur_depth;
+        if (density > 0.00001) {
+            vec3 scattering = SCATTERING * density;
+            float absorption = ABSORPTION * density;
+            float extinction = mean3(scattering) + absorption;
 
-        vec3 in_scattering = vec3(0.0);
-        if (DIRECT_LIGHT_ENABLED) {
-            float phase = henyeyGreenstein(cur_world_pos, CAM_POS, DIRECT_LIGHT_DIR, ANISOTROPY);
-            vec2 luminances = directLightLuminance(cur_world_pos);
+            vec3 in_scattering = vec3(0.0);
+            if (DIRECT_LIGHT_ENABLED) {
+                float phase = henyeyGreenstein(cur_world_pos, CAM_POS, DIRECT_LIGHT_DIR, ANISOTROPY);
+                vec2 luminances = directLightLuminance(cur_world_pos) * getDirectLightVolumetricTransmittance(cur_world_pos, MIN, MAX, wind_offset);
 
-            in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
-            in_scattering += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
-        }
-        for (int i = 0; i < NUM_LIGHTS; i++) {
-            vec4 light_pos = positions[i];
-            vec4 light_color = colors[i];
-            float light_intensity = intensities[i];
-            float const_att = constAtt[i];
-            float linear_att = linearAtt[i];
-            float quad_att = quadAtt[i];
-            bool enabled = enableds[i];
-
-            if (enabled) {
-                vec4 world_light_dir = cur_world_pos - light_pos;
-                vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, const_att, linear_att, quad_att, i);
-                float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
-
-                in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity);
-                in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity);
+                in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
+                in_scattering += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
             }
-        }
+            //for (int i = 0; i < NUM_LIGHTS; i++) {
+            //    vec4 light_pos = positions[i];
+            //    vec4 light_color = colors[i];
+            //    float light_intensity = intensities[i];
+            //    float const_att = constAtt[i];
+            //    float linear_att = linearAtt[i];
+            //    float quad_att = quadAtt[i];
+            //    bool enabled = enableds[i];
 
-        vec4 scatTrans = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride);
-        tmp_accum_scattering = scatTrans.rgb;
-        tmp_accum_transmittance = scatTrans.a;
+            //    if (enabled) {
+            //        vec4 world_light_dir = cur_world_pos - light_pos;
+            //        vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, const_att, linear_att, quad_att, i) * getPointLightVolumetricTransmittance(cur_world_pos, light_pos, MIN, MAX, wind_offset);
+            //        float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
+
+            //        in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity);
+            //        in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity);
+            //    }
+            //}
+
+            vec4 scatTrans = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride);
+            tmp_accum_scattering = scatTrans.rgb;
+            tmp_accum_transmittance = scatTrans.a;
+        }
 
         cur_world_pos += vec4(ray_dir * stride,0.0);
         vec4 cur_view_pos = V * cur_world_pos;

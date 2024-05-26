@@ -1,0 +1,39 @@
+#version 460
+
+layout (local_size_x=8, local_size_y=8, local_size_z=1) in;
+
+// Programable parameters
+uniform int OCTAVES = 10;
+uniform float STARTING_AMPLITUDE = 1.0;
+uniform float STARTING_FREQ = 3;
+uniform float GAIN = 0.5;
+uniform float LACUNARITY = 2;
+
+uniform writeonly image3D DENSITY_UNIT;
+
+float octaveNoise(
+    vec3 pos,
+    int octaves,
+    float startingAmplitude,
+    float startingFreq,
+    float gain,
+    float lacunarity
+);
+
+const ivec3 TEX_DIMS = ivec3(256,256,256);
+
+vec3 id_to_uvw(ivec3 id) {
+    return vec3(id)/vec3(TEX_DIMS);
+}
+
+void main() {
+    ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
+    vec3 worldPos = id_to_uvw(storeLoc);
+
+    float noise = octaveNoise(worldPos, OCTAVES, STARTING_AMPLITUDE, STARTING_FREQ, GAIN, LACUNARITY) * 0.5 + 0.5;
+
+    if (noise < 0.58) 
+        noise = 0;
+
+    imageStore(DENSITY_UNIT, storeLoc, vec4(noise,noise,noise,1.0));
+}

@@ -134,9 +134,9 @@ float pointLightLuminance(vec3 normal, vec4 worldPos, vec4 lightPos, float maxRa
     return luminance * attenuation;
 }
 
-vec4 toneMap(vec4 color, float gamma) {
-    color = color / (color + vec4(1.0));
-    return pow(color, vec4(1.0/gamma)); 
+vec3 toneMap(vec3 color, float gamma) {
+    color = color / (color + vec3(1.0));
+    return pow(color, vec3(1.0/gamma)); 
 }
 
 void main() {
@@ -146,21 +146,21 @@ void main() {
 
     if (DIRECT_LIGHT_ENABLED) {
         float luminance = shadowIlumination(normal, normalize(DataIn.lightDir));
-        color = albedo * DIRECT_LIGHT_COLOR * luminance * DIRECT_LIGHT_INTENSITY;
+        color = albedo * DIRECT_LIGHT_COLOR * luminance;
     }
 
-    for (int i = 0; i < NUM_LIGHTS; i++) {
-        vec4 lightPos = positions[i];
-        vec4 lightColor = colors[i];
-        float maxRange = maxRanges[i];
-        float lightIntensity = intensities[i];
-        bool enabled = enableds[i];
+    //for (int i = 0; i < NUM_LIGHTS; i++) {
+    //    vec4 lightPos = positions[i];
+    //    vec4 lightColor = colors[i];
+    //    float maxRange = maxRanges[i];
+    //    float lightIntensity = intensities[i];
+    //    bool enabled = enableds[i];
 
-        if (enabled) {
-            float luminance = pointLightLuminance(normal, DataIn.worldPos, lightPos, maxRange, i);
-            color += albedo * lightColor * luminance * lightIntensity;
-        }
-    }
+    //    if (enabled) {
+    //        float luminance = pointLightLuminance(normal, DataIn.worldPos, lightPos, maxRange, i);
+    //        color += albedo * lightColor * luminance * lightIntensity;
+    //    }
+    //}
 
     if (VOL_ACTIVE == 0) {
         vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, PV);
@@ -169,8 +169,10 @@ void main() {
         vec3 inScattering = scatTransmittance.rgb;
         float transmittance = scatTransmittance.a;
 
+        inScattering = toneMap(inScattering, GAMMA);
+
         color.rgb = color.rgb * transmittance + inScattering;
     }
 
-    FragColor = toneMap(color, GAMMA);
+    FragColor = color;
 }

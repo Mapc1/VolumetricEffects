@@ -7,12 +7,13 @@
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
             <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
             <attribute type="STATE" name="HOMOGENEOUS_MEDIA" data="INT" value="0"/>
-            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="5"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
             <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="500.0"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
             <attribute type="CAMERA" name="PREV_PROJ_VIEW_MAT" data="MAT4"/>
         </attributes>
+        
         <scenes>
             <scene name="Sponza" filename="..\models\sponza\sponza.obj"/>
             <scene name="SkyBox">
@@ -201,6 +202,7 @@
             </pass>
 
             <pass class="default" name="genPointLightShadowMap8">
+                <mode value="RUN_ONCE"/>
                 <scenes>
                     <scene name="Sponza"/>
                 </scenes>
@@ -238,8 +240,8 @@
             </pass>
 
             <pass class="compute" name="CalcScattering">
-                <preScript file="scripts/light_loading.lua" script="lights"/>
-                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="128"/>
+                <!--<preScript file="scripts/light_loading.lua" script="lights"/>-->
+                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="64"/>
             </pass>
 
             <pass class="compute" name="ScatIntegration">

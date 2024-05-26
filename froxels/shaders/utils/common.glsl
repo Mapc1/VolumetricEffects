@@ -2,7 +2,7 @@
 
 #define VOXEL_GRID_SIZE_X 160
 #define VOXEL_GRID_SIZE_Y 90
-#define VOXEL_GRID_SIZE_Z 128
+#define VOXEL_GRID_SIZE_Z 64
 #define BLUE_NOISE_TEXTURE_SIZE 128
 
 // ------------------------------------------------------------------

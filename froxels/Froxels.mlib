@@ -35,7 +35,7 @@
 
     <renderTargets>
         <renderTarget name="shadowMap">
-            <SIZE width="4096" height="4096"/>
+            <SIZE width="2048" height="2048"/>
             <depth name="shadowMap" internalFormat="DEPTH_COMPONENT32F"/>
         </renderTarget>
 
@@ -142,7 +142,7 @@
         <texture name="scatteringTex">
             <WIDTH value="160"/>
             <HEIGHT value="90"/>
-            <DEPTH value="128"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
             <MIPMAP value="true"/>
         </texture>
@@ -150,7 +150,7 @@
         <texture name="historyTex">
             <WIDTH value="160"/>
             <HEIGHT value="90"/>
-            <DEPTH value="128"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
             <MIPMAP value="true"/>
         </texture>
@@ -158,7 +158,7 @@
         <texture name="integrationTex">
             <WIDTH value="160"/>
             <HEIGHT value="90"/>
-            <DEPTH value="128"/>
+            <DEPTH value="64"/>
             <INTERNAL_FORMAT value="RGBA16F"/>
             <MIPMAP value="true"/>
         </texture>
@@ -185,13 +185,14 @@
         />
         <shader name="genDensityNoise">
             <cs>
-                <file name="shaders/compute/genDensityNoise.comp"/>
+                <file name="../common_shaders/genDensityNoise.comp"/>
                 <file name="shaders/utils/perlinNoise3D.glsl"/>
             </cs>
         </shader>
         <shader name="calcScattering">
             <cs>
                 <file name="shaders/compute/calcScattering.comp"/>
+                <file name="../common_shaders/mediaSampling.glsl"/>
                 <file name="shaders/utils/common.glsl"/>
             </cs>
         </shader>

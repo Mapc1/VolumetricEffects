@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Volumetric Effects - Ray-marching" width="1280" height="720">
+    <assets>
+        <attributes>
+            <attribute type="STATE" name="CUBE_ANISOTROPY" data="FLOAT" value="0.7"/>
+            <attribute type="STATE" name="CUBE_SCATTERING" data="VEC4" x="0.3" y="0.8" z="0.3" w="1.0"/>
+            <attribute type="STATE" name="CUBE_ABSORPTION" data="FLOAT" value="0.1"/>
+            <attribute type="STATE" name="CUBE_DENSITY" data="FLOAT" value="0.01"/>
+
+            <attribute type="STATE" name="SPHERE_ANISOTROPY" data="FLOAT" value="0.1"/>
+            <attribute type="STATE" name="SPHERE_SCATTERING" data="VEC4" x="0.01" y="0.01" z="0.01" w="1.0"/>
+            <attribute type="STATE" name="SPHERE_ABSORPTION" data="FLOAT" value="0.8"/>
+            <attribute type="STATE" name="SPHERE_DENSITY" data="FLOAT" value="0.02"/>
+
+            <attribute type="STATE" name="NUM_STEPS" data="INT" value="64"/>            
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
+            <attribute type="RENDERER" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
+            <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
+        </attributes>
+
+        <scenes>
+            <scene name="Plane">
+                <geometry name="Plane" type="GRID" material="plane" LENGTH="1024" DIVISIONS="1024"/>
+            </scene>
+            <scene name="SkyBox">
+                <geometry name="Box" type="BOX" material="skybox">
+                    <SCALE x="-1200" y="-1200" z="-1200"/>
+                </geometry>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="MainViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+            </viewport>
+            <viewport name="CM_Viewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+                <SIZE width="1024" height="1024"/>
+            </viewport>
+        </viewports>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="2000.0"/>
+                <POSITION x="-41" y="273" z="384"/>
+                <LOOK_AT_POINT x="-41" y="272.740" z="383"/>
+                <UP x="0.0" y="1.0" z="0.0"/>
+            </camera>    
+        </cameras>
+
+        <lights>
+            <light name="Sun">
+                <DIRECTION x="0.5" y="-0.7" z="0.4"/>
+                <COLOR r="1.0" g="1.0" b="1.0"/>
+            </light>
+        </lights>
+
+        <materialLibs>
+            <materialLib filename="RayMarching.mlib"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="ray-marching" defaultCamera="MainCamera">
+
+            <pass class="depthmap" name="genShadowMap">
+                <scenes>
+                    <scene name="Plane"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+                <renderTarget name="shadowMap" fromLibrary="RayMarching"/>
+                <materialMaps>
+                    <map fromMaterial="*" toLibrary="RayMarching" toMaterial="shadowMap"/>
+                </materialMaps>
+            </pass>
+            
+            <pass class="default" name="gBuffer">
+                <viewport name="MainViewport"/>
+                <scenes>
+                    <scene name="Plane"/>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="gBuffer" fromLibrary="RayMarching" />
+                    </map>
+                </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skybox" toLibrary="RayMarching" toMaterial="skybox_gBuffer"/>
+                </materialMaps>
+                <renderTarget name="gBuffer" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="scatIntegration">
+                <COLOR_CLEAR value="false" />
+                <camera name="MainCamera"/>
+                <viewport name="MainViewport"/>
+                <material name="scatIntegration" fromLibrary="RayMarching"/>
+                <renderTarget name="scatTrans" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="gaussianBlurHorizontal">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="gaussianBlurHorizontal" fromLibrary="RayMarching"/>
+                <renderTarget name="step1BlurScatTrans" fromLibrary="RayMarching"/>
+            </pass>
+
+            <pass class="quad" name="gaussianBlurVertical">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <material name="gaussianBlurVertical" fromLibrary="RayMarching"/>
+                <renderTarget name="finalBlurScatTrans" fromLibrary="RayMarching"/>
+            </pass>
+            
+            <pass class="quad" name="render">
+                <COLOR_CLEAR value="false" />
+                <viewport name="MainViewport"/>
+                <camera name="MainCamera"/>
+                <material name="render" fromLibrary="RayMarching"/>
+            </pass>
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="Settings" >
+            <var label="Ray-marching steps" type="STATE" context="RayMarching::scatIntegration" component="NUM_STEPS" def="min=1 max=5000"/>
+            <var label="Ambient light strength" type="RENDERER" context="CURRENT" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
+            <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
+        </window>
+        <window label="Fog properties">
+            <var label="Cube anisotropy" type="STATE" context="RayMarching::scatIntegration" component="CUBE_ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Cube scattering" type="STATE" context="RayMarching::scatIntegration" component="CUBE_SCATTERING" def="min=0 max=1"/>
+            <var label="Cube absorption" type="STATE" context="RayMarching::scatIntegration" component="CUBE_ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Cube density" type="STATE" context="RayMarching::scatIntegration" component="CUBE_DENSITY" def="min=0 max=0.1"/>
+
+            <var label="Sphere anisotropy" type="STATE" context="RayMarching::scatIntegration" component="SPHERE_ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Sphere scattering" type="STATE" context="RayMarching::scatIntegration" component="SPHERE_SCATTERING" def="min=0 max=1"/>
+            <var label="Sphere absorption" type="STATE" context="RayMarching::scatIntegration" component="SPHERE_ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Sphere density" type="STATE" context="RayMarching::scatIntegration" component="SPHERE_DENSITY" def="min=0 max=0.1"/>
+        </window>
+        <window label="Directional light properties">
+            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR"/>
+            <var label="Enabled" type="LIGHT" context="Sun" component="ENABLED"/>
+        </window>
+    </interface>
+</project>

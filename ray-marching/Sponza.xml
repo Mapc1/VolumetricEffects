@@ -48,8 +48,8 @@
                 <VIEW x="-0.958" y="0.286" z="0"/>
                 <POSITION x="1031" y="1415" z="-67"/>
                 -->
-                <POSITION x="900" y="500" z="500"/>
-                <LOOK_AT_POINT x="600" y="800" z="-400"/>
+                <POSITION x="883.9" y="553.7" z="-42.4"/>
+                <LOOK_AT_POINT x="882.9" y="553.5" z="-42.4"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
 
@@ -81,35 +81,35 @@
             </light>
             <light name="PointLight2">
                 <COLOR r="0.2" g="0.4" b="0.55"/>
-                <POSITION x="0.0" y="700.0" z="500.0"/>
+                <POSITION x="250.0" y="550.0" z="250.0"/>
                 <CONSTANT_ATT value="1"/>
                 <LINEAR_ATT value="0.022"/>
                 <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight3">
                 <COLOR r="0.2" g="0.4" b="0.55"/>
-                <POSITION x="0.0" y="-700.0" z="-500.0"/>
+                <POSITION x="0.0" y="500.0" z="-500.0"/>
                 <CONSTANT_ATT value="1"/>
                 <LINEAR_ATT value="0.022"/>
                 <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight4">
                 <COLOR r="0.2" g="0.7" b="0.3"/>
-                <POSITION x="1000.0" y="300.0" z="0.0"/>
+                <POSITION x="-1000.0" y="300.0" z="100.0"/>
                 <CONSTANT_ATT value="1"/>
                 <LINEAR_ATT value="0.022"/>
                 <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight5">
                 <COLOR r="0.3" g="0.4" b="0.2"/>
-                <POSITION x="-1000.0" y="200.0" z="300.0"/>
+                <POSITION x="-600.0" y="100.0" z="-300.0"/>
                 <CONSTANT_ATT value="1"/>
                 <LINEAR_ATT value="0.022"/>
                 <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight6">
                 <COLOR r="0.7" g="0.5" b="0.5"/>
-                <POSITION x="400.0" y="1000.0" z="0.0"/>
+                <POSITION x="400.0" y="150.0" z="-100.0"/>
                 <CONSTANT_ATT value="1"/>
                 <LINEAR_ATT value="0.022"/>
                 <QUADRATIC_ATT value="0.0019"/>
@@ -130,7 +130,7 @@
             </light>
             <light name="PointLight9">
                 <COLOR r="0.5" g="0.2" b="0.55"/>
-                <POSITION x="0.0" y="0.0" z="500.0"/>
+                <POSITION x="270" y="250" z="350.0"/>
                 <CONSTANT_ATT value="1"/>
                 <LINEAR_ATT value="0.022"/>
                 <QUADRATIC_ATT value="0.0019"/>
@@ -282,7 +282,7 @@
             </pass>
 
             <pass class="default" name="gBuffer">
-                <!--<preScript file="scripts/light_loading.lua" script="lights"/>-->
+                <preScript file="scripts/light_loading.lua" script="lights"/>
                 <viewport name="MainViewport"/>
                 <scenes>
                     <scene name="Sponza"/>
@@ -321,7 +321,6 @@
                 <material name="gaussianBlurVertical" fromLibrary="RayMarching"/>
                 <renderTarget name="finalBlurScatTrans" fromLibrary="RayMarching"/>
             </pass>
-            <!--
             <pass class="default" name="PointLightPass">
                 <scenes instances="10">
                     <scene name="LightSphere"/>
@@ -334,7 +333,7 @@
                     <map fromMaterial="*" toLibrary="RayMarching" toMaterial="pointLightIlumination"/>
                 </materialMaps>
             </pass>
-        -->            
+            
             <pass class="quad" name="render">
                 <COLOR_CLEAR value="false" />
                 <viewport name="MainViewport"/>

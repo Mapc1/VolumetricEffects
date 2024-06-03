@@ -95,7 +95,7 @@
             </light>
             <light name="PointLight9">
                 <COLOR r="0.5" g="0.2" b="0.55"/>
-                <POSITION x="0.270" y="0.250" z="350.0"/>
+                <POSITION x="270" y="250" z="350.0"/>
             </light>
             <light name="PointLight10">
                 <COLOR r="0.5" g="0.8" b="0.55"/>

@@ -289,24 +289,24 @@ void main() {
                 in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
                 in_scattering += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);
             }
-            //for (int i = 0; i < NUM_LIGHTS; i++) {
-            //    vec4 light_pos = positions[i];
-            //    vec4 light_color = colors[i];
-            //    float light_intensity = intensities[i];
-            //    float const_att = constAtt[i];
-            //    float linear_att = linearAtt[i];
-            //    float quad_att = quadAtt[i];
-            //    bool enabled = enableds[i];
+            for (int i = 0; i < NUM_LIGHTS; i++) {
+                vec4 light_pos = positions[i];
+                vec4 light_color = colors[i];
+                float light_intensity = intensities[i];
+                float const_att = constAtt[i];
+                float linear_att = linearAtt[i];
+                float quad_att = quadAtt[i];
+                bool enabled = enableds[i];
 
-            //    if (enabled) {
-            //        vec4 world_light_dir = cur_world_pos - light_pos;
-            //        vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, const_att, linear_att, quad_att, i) * getPointLightVolumetricTransmittance(cur_world_pos, light_pos, MIN, MAX, wind_offset);
-            //        float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
+                if (enabled) {
+                    vec4 world_light_dir = cur_world_pos - light_pos;
+                    vec2 luminances = pointLightLuminance(cur_world_pos, light_pos, const_att, linear_att, quad_att, i) * getPointLightVolumetricTransmittance(cur_world_pos, light_pos, MIN, MAX, wind_offset);
+                    float phase = henyeyGreenstein(cur_world_pos, CAM_POS, world_light_dir, ANISOTROPY);
 
-            //        in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity);
-            //        in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity);
-            //    }
-            //}
+                    in_scattering += calcScattering(scattering, isotropic_phase, luminances.y, light_color, light_intensity);
+                    in_scattering += calcScattering(scattering, phase, luminances.x, light_color, light_intensity);
+                }
+            }
 
             vec4 scatTrans = accumulateScatTrans(in_scattering, extinction, tmp_accum_scattering, tmp_accum_transmittance, stride);
             tmp_accum_scattering = scatTrans.rgb;

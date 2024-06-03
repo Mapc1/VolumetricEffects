@@ -237,9 +237,6 @@
             <CULL_TYPE value="FRONT" />
             <DEPTH_MASK value="false" />
         </state>
-        <state name="frontCull">
-            <CULL_TYPE value="FRONT"/>
-        </state>
     </states>
 
     <materials>

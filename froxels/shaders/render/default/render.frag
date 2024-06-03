@@ -149,18 +149,18 @@ void main() {
         color = albedo * DIRECT_LIGHT_COLOR * luminance;
     }
 
-    //for (int i = 0; i < NUM_LIGHTS; i++) {
-    //    vec4 lightPos = positions[i];
-    //    vec4 lightColor = colors[i];
-    //    float maxRange = maxRanges[i];
-    //    float lightIntensity = intensities[i];
-    //    bool enabled = enableds[i];
+    for (int i = 0; i < NUM_LIGHTS; i++) {
+        vec4 lightPos = positions[i];
+        vec4 lightColor = colors[i];
+        float maxRange = maxRanges[i];
+        float lightIntensity = intensities[i];
+        bool enabled = enableds[i];
 
-    //    if (enabled) {
-    //        float luminance = pointLightLuminance(normal, DataIn.worldPos, lightPos, maxRange, i);
-    //        color += albedo * lightColor * luminance * lightIntensity;
-    //    }
-    //}
+        if (enabled) {
+            float luminance = pointLightLuminance(normal, DataIn.worldPos, lightPos, maxRange, i);
+            color += albedo * lightColor * luminance;
+        }
+    }
 
     if (VOL_ACTIVE == 0) {
         vec3 uvw = world_to_uv(DataIn.worldPos.xyz, NEAR, FAR, 0.0, PV);

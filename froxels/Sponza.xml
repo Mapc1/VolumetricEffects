@@ -9,7 +9,7 @@
             <attribute type="STATE" name="HOMOGENEOUS_MEDIA" data="INT" value="0"/>
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
-            <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="500.0"/>
+            <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="600.0"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
             <attribute type="CAMERA" name="PREV_PROJ_VIEW_MAT" data="MAT4"/>
         </attributes>
@@ -37,8 +37,8 @@
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
                 <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="7000.0"/>
-                <POSITION x="900" y="500" z="500"/>
-                <LOOK_AT_POINT x="600" y="800" z="-400"/>
+                <POSITION x="883.9" y="553.7" z="-42.4"/>
+                <LOOK_AT_POINT x="882.9" y="553.5" z="-42.4"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
 
@@ -67,23 +67,23 @@
             </light>
             <light name="PointLight2">
                 <COLOR r="0.2" g="0.4" b="0.55"/>
-                <POSITION x="0.0" y="700.0" z="500.0"/>
+                <POSITION x="250.0" y="550.0" z="250.0"/>
             </light>
             <light name="PointLight3">
                 <COLOR r="0.2" g="0.4" b="0.55"/>
-                <POSITION x="0.0" y="-700.0" z="-500.0"/>
+                <POSITION x="0.0" y="500.0" z="-500.0"/>
             </light>
             <light name="PointLight4">
                 <COLOR r="0.2" g="0.7" b="0.3"/>
-                <POSITION x="1000.0" y="300.0" z="0.0"/>
+                <POSITION x="-1000.0" y="300.0" z="100.0"/>
             </light>
             <light name="PointLight5">
-                <COLOR r="0.3" g="0.4" b="0.2"/>
-                <POSITION x="-1000.0" y="200.0" z="300.0"/>
+                <COLOR r="0.775" g="0.247" b="0.728"/>
+                <POSITION x="-600.0" y="100.0" z="-300.0"/>
             </light>
             <light name="PointLight6">
                 <COLOR r="0.7" g="0.5" b="0.5"/>
-                <POSITION x="400.0" y="1000.0" z="0.0"/>
+                <POSITION x="400.0" y="150.0" z="-100.0"/>
             </light>
             <light name="PointLight7">
                 <COLOR r="0.2" g="0.8" b="0.8"/>
@@ -95,7 +95,7 @@
             </light>
             <light name="PointLight9">
                 <COLOR r="0.5" g="0.2" b="0.55"/>
-                <POSITION x="0.0" y="0.0" z="500.0"/>
+                <POSITION x="0.270" y="0.250" z="350.0"/>
             </light>
             <light name="PointLight10">
                 <COLOR r="0.5" g="0.8" b="0.55"/>
@@ -240,7 +240,7 @@
             </pass>
 
             <pass class="compute" name="CalcScattering">
-                <!--<preScript file="scripts/light_loading.lua" script="lights"/>-->
+                <preScript file="scripts/light_loading.lua" script="lights"/>
                 <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="64"/>
             </pass>
 

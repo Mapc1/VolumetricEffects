@@ -279,22 +279,22 @@ void main() {
                 lScat += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
             }
 
-            //for (int j = 0; j < NUM_LIGHTS; j++) {
-            //    vec4 lightPos = positions[j];
-            //    vec4 lightColor = colors[j];
-            //    float lightIntensity = intensities[j];
-            //    float maxRange = maxRanges[j];
-            //    bool enabled = enableds[j];
+            for (int j = 0; j < NUM_LIGHTS; j++) {
+                vec4 lightPos = positions[j];
+                vec4 lightColor = colors[j];
+                float lightIntensity = intensities[j];
+                float maxRange = maxRanges[j];
+                bool enabled = enableds[j];
 
-            //    if (enabled) {
-            //        vec4 worldLightDir = worldPos - lightPos;
-            //        vec2 luminances = pointLightLuminance(worldPos, lightPos, maxRange, j) * getPointLightVolumetricTransmittance(worldPos, lightPos, MIN, MAX, windOffset);
-            //        float phase = henyeyGreenstein(worldPos, CAM_POS, worldLightDir, ANISOTROPY);
+                if (enabled) {
+                    vec4 worldLightDir = worldPos - lightPos;
+                    vec2 luminances = pointLightLuminance(worldPos, lightPos, maxRange, j) * getPointLightVolumetricTransmittance(worldPos, lightPos, MIN, MAX, windOffset);
+                    float phase = henyeyGreenstein(worldPos, CAM_POS, worldLightDir, ANISOTROPY);
 
-            //        lScat += calcScattering(scattering, isotropicPhase, luminances.y, lightColor, lightIntensity);
-            //        lScat += calcScattering(scattering, phase, luminances.x, lightColor, lightIntensity);
-            //    }
-            //}
+                    lScat += calcScattering(scattering, isotropicPhase, luminances.y, lightColor, lightIntensity);
+                    lScat += calcScattering(scattering, phase, luminances.x, lightColor, lightIntensity);
+                }
+            }
         }
         vec4 scatExt = vec4(lScat, extinction);
 

@@ -1,0 +1,190 @@
+#version 430
+
+#define TEX_DIMS ivec3(160,90,64)
+#define PI 3.1415926538
+
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+// Output texture
+uniform writeonly image3D SCATTERING_UNIT;
+
+// Input textures
+uniform sampler3D HISTORY_UNIT;
+uniform sampler3D DENSITY_UNIT;
+
+// Camera props
+uniform vec4 CAM_POS;
+uniform mat4 INV_VIEW_MAT;
+uniform mat4 INV_PROJ_MAT;
+uniform mat4 PREV_PROJ_VIEW_MAT;
+uniform float NEAR;
+uniform float FAR;
+
+uniform uint FRAME_COUNT;
+
+// Directional light props
+uniform vec4 DIRECT_LIGHT_DIR;
+uniform vec4 DIRECT_LIGHT_COLOR;
+uniform float DIRECT_LIGHT_INTENSITY;
+uniform mat4 DIRECT_LIGHT_SPACE_MAT;
+
+// Fog props
+uniform float ANISOTROPY;
+uniform vec3 SCATTERING;
+uniform float ABSORPTION;
+uniform float DENSITY;
+
+// Other props
+uniform float AMBIENT_LIGHT_STRENGTH;
+uniform int VOL_ACTIVE;
+
+const int NUM_LIGHTS = 10;
+
+// For density texture
+const vec3 DENSITY_TEX_DIMS = vec3(256,256,256);
+//const vec4 MIN = vec4(-3000,-3000,-3000,1.0);
+//const vec4 MAX = vec4(3000,3000,3000,1.0);
+const vec4 MIN = vec4(-700,-700,-700,1.0);
+const vec4 MAX = vec4(700,700,700,1.0);
+
+
+// Density texture stride
+vec3 WIND = vec3(1.0,0.0,0.0);
+float WIND_SPEED = 0.0;//0.0002;
+
+float jitter[32] = {
+    0.375, 0.4375,
+    0.625, 0.0625,
+    0.875, 0.1875,
+    0.125, 0.0625,
+    0.375, 0.6875,
+    0.875, 0.4375,
+    0.625, 0.5625,
+    0.375, 0.9375,
+    0.625, 0.3125,
+    0.125, 0.5625,
+    0.125, 0.8125,
+    0.375, 0.1875,
+    0.875, 0.9375,
+    0.875, 0.6875,
+    0.125, 0.3125,
+    0.625, 0.8125
+};
+
+vec3 id_to_world_with_jitter(ivec3 id, float jitter, float n, float f, float depth_power, mat4 inv_vp);
+vec3 id_to_world(ivec3 id, float n, float f, float depth_power, mat4 inv_vp);
+vec3 world_to_uv(vec3 world_pos, float n, float f, float depth_power, mat4 vp);
+
+float sampleMedia(vec4 worldPos, bool isHomogeneousMedia, vec4 minPos, vec4 maxPos, vec3 windOffset, sampler3D densityTexture);
+
+//////////////////////////////////////////////////////////////////
+//
+//                     Auxiliary functions
+//
+//////////////////////////////////////////////////////////////////
+float mean3(vec3 v) {
+    return (v.x + v.y + v.z) / 3;
+}
+
+float camLightAngle(vec4 worldPos) {
+    vec4 froxelCamDir = normalize(CAM_POS - worldPos);
+    vec4 froxelLightDir = normalize(-DIRECT_LIGHT_DIR);
+
+    return acos(dot(froxelLightDir, froxelCamDir));
+}
+
+float getJitter(ivec3 threadID) {
+    uint idx = int(FRAME_COUNT + threadID.x * threadID.y * threadID.z) % 32;
+
+    return (jitter[idx] - 0.5) * 0.999;
+}
+
+//////////////////////////////////////////////////////////////////
+//
+//       In-scattering and volumetric shadows calculation
+//
+//////////////////////////////////////////////////////////////////
+float getDirectLightVolumetricTransmittance(vec4 worldPos, vec4 minPos, vec4 maxPos, vec3 windOffset) {
+    float transmittance = 1.0;
+    vec4 curWorldPos = worldPos;
+    vec4 stride = vec4(-DIRECT_LIGHT_DIR.xyz,0.0) * ((MAX.y-worldPos.y)/16);
+    float strideLen = length(stride);
+
+    for (int i = 0; i < 16 && curWorldPos.y < MAX.y; i++) {
+        float density = sampleMedia(curWorldPos, false, minPos, maxPos, windOffset, DENSITY_UNIT) * DENSITY;
+        vec3 scattering = SCATTERING * density;
+        float absorption = ABSORPTION * density;
+        float extinction = mean3(scattering) + absorption;
+        float stepTransmittance = exp(-extinction*strideLen);
+        transmittance *= stepTransmittance;
+        curWorldPos += stride;
+    }
+
+    return transmittance;
+}
+
+vec3 calcScattering(vec3 scattering, float phase, float inLight, vec4 lightColor, float intensity) {
+    return scattering * intensity * phase * inLight * lightColor.rgb;
+}
+
+
+//////////////////////////////////////////////////////////////////
+//
+//                      Phase calculation
+//
+//////////////////////////////////////////////////////////////////
+float henyeyGreenstein(vec4 worldPos, vec4 camPos, vec4 lightDir, float g) {
+    vec4 pointCamDir = normalize(camPos - worldPos);
+    vec4 pointLightDir = normalize(lightDir);
+
+    float cosAngle = dot(pointCamDir, pointLightDir);
+    float denom = 4*PI * pow((1+g*g - 2*g*cosAngle), 3/2);
+    return (1-g*g) / denom;
+}
+
+float isotropicPhase() {
+    return 1/(4*3.14159);
+}
+
+
+void main() {
+    if (VOL_ACTIVE == 1) {
+        return;
+    }
+
+    ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
+
+    if (all(lessThan(storeLoc, TEX_DIMS))) {
+        vec3 lScat = vec3(0);
+        float extinction = 0.0;
+        float isotropicPhase = isotropicPhase();
+    
+        float jit = getJitter(storeLoc);
+        vec4 worldPos = vec4(id_to_world_with_jitter(storeLoc, jit, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+        vec3 windOffset = FRAME_COUNT * WIND * WIND_SPEED;
+        float density = sampleMedia(worldPos, false, MIN, MAX, windOffset, DENSITY_UNIT) * DENSITY;
+        vec3 scattering = SCATTERING * density;
+        float absorption = ABSORPTION * density;
+        extinction += mean3(scattering) + absorption;
+
+        if (density > 0.00001) {
+            vec2 luminances = vec2(1-AMBIENT_LIGHT_STRENGTH, AMBIENT_LIGHT_STRENGTH) * getDirectLightVolumetricTransmittance(worldPos, MIN, MAX, windOffset);
+            float phase = henyeyGreenstein(worldPos, CAM_POS, DIRECT_LIGHT_DIR, ANISOTROPY);
+
+            lScat += calcScattering(scattering, isotropicPhase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
+            lScat += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
+        }
+        vec4 scatExt = vec4(lScat, extinction);
+
+        // TAA
+        vec4 worldPosWithoutJitter = vec4(id_to_world(storeLoc, NEAR, FAR, 0.0, INV_VIEW_MAT * INV_PROJ_MAT), 1.0);
+        vec3 hist_uv = world_to_uv(worldPosWithoutJitter.xyz, NEAR, FAR, 0.0, PREV_PROJ_VIEW_MAT);
+
+        if (all(greaterThanEqual(hist_uv, vec3(0.0))) && all(lessThanEqual(hist_uv, vec3(1.0)))) {
+            vec4 history = textureLod(HISTORY_UNIT, hist_uv, 0);
+            scatExt = mix(history, scatExt, 0.05);
+        }
+
+        imageStore(SCATTERING_UNIT, storeLoc, scatExt);
+    }
+}

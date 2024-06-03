@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Volumetric Effects - Froxels" width="1280" height="720">
+    <assets>
+        <attributes>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.7"/>
+            <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
+            <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
+            <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
+            <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
+            <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
+            <attribute type="CAMERA" name="PREV_PROJ_VIEW_MAT" data="MAT4"/>
+        </attributes>
+        
+        <scenes>
+            <scene name="SkyBox">
+                <geometry name="Box" type="BOX" material="skyBox">
+                    <SCALE x="1200" y="1200" z="1200"/>
+                </geometry>
+            </scene>
+        </scenes>
+
+        <viewports>
+            <viewport name="MainViewport">
+                <CLEAR_COLOR r="0.0" g="0.0" b="0.0"/>
+            </viewport>
+        </viewports>
+
+        <cameras>
+            <camera name="MainCamera">
+                <viewport name="MainViewport"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="2000.0"/>
+                <POSITION x="0" y="0" z="0"/>
+                <LOOK_AT_POINT x="1" y="0" z="0"/>
+                <UP x="0.0" y="1.0" z="0.0"/>
+            </camera>
+        </cameras>
+
+        <lights>
+            <light name="Sun">
+                <DIRECTION x="0.5" y="-0.7" z="0.4"/>
+                <COLOR r="1.0" g="1.0" b="1.0"/>
+            </light>
+        </lights>
+
+        <materialLibs>
+            <materialLib filename="Froxels.mlib"/>
+        </materialLibs>
+    </assets>
+
+    <pipelines>
+        <pipeline name="volfx" defaultCamera="MainCamera">
+            <pass class="compute" name="GenDensityNoise">
+                <mode value="RUN_ONCE"/>
+                <material name="genDensityNoise" fromLibrary="Froxels" dimX="256" dimY="256" dimZ="256"/>
+            </pass>
+
+            <pass class="compute" name="CalcScattering">
+                <material name="calcScattering" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="64"/>
+            </pass>
+
+            <pass class="compute" name="ScatIntegration">
+                <material name="scatIntegration" fromLibrary="Froxels" dimX="160" dimY="90" dimZ="1"/>
+            </pass>
+
+            <pass class="default" name="Render">
+                <scenes>
+                    <scene name="SkyBox"/>
+                </scenes>
+                <camera name="MainCamera"/>
+                <lights>
+                    <light name="Sun"/>
+                </lights>
+                <postScript file="scripts/temporal_matrix_set.lua" script="tms"/>
+                <injectionMaps>
+                    <map toMaterial="*">
+                        <shader fromMaterial="skyBox" fromLibrary="Froxels" />
+                        <textures>
+                            <texture name="integrationTex" fromLibrary="Froxels" toUnit="2">
+                                <WRAP_S value="CLAMP_TO_EDGE"/>
+                                <WRAP_R value="CLAMP_TO_EDGE"/>
+                                <WRAP_T value="CLAMP_TO_EDGE"/>
+                                <MIN_FILTER value="LINEAR"/>
+                                <MAG_FILTER value="LINEAR"/>
+                            </texture>
+                        </textures>
+                    </map>
+                </injectionMaps>
+                <materialMaps>
+                    <map fromMaterial="skyBox" toLibrary="Froxels" toMaterial="skyBox"/>
+                </materialMaps>
+            </pass>
+        </pipeline>
+    </pipelines>
+
+    <interface>
+        <window label="settings">
+            <var label="Ambient light" type="LIGHT" context="Sun" component="AMBIENT_LIGHT_STRENGTH" def="min=0 max=1"/>
+            <var label="Volumetric effects" type="RENDERER" context="CURRENT" component="VOL_ACTIVE" strings="Active,Inactive"/>
+        </window>
+        <window label="Fog">
+            <var label="Anisotropy" type="STATE" context="Froxels::calcScattering" component="ANISOTROPY" def="min=0 max=0.999"/>
+            <var label="Scattering" type="STATE" context="Froxels::calcScattering" component="SCATTERING" def="min=0 max=1"/>
+            <var label="Absorption" type="STATE" context="Froxels::calcScattering" component="ABSORPTION" def="min=0.001 max=1"/>
+            <var label="Density" type="STATE" context="Froxels::calcScattering" component="DENSITY" def="min=0.001 max=0.1"/>
+        </window>
+        <window label="Directional light properties">
+            <var label="Light direction" type="LIGHT" context="Sun" component="DIRECTION" def="min=-1 max=1"/>
+            <var label="Light intensity" type="LIGHT" context="Sun" component="LIGHT_INTENSITY" def="min=0 max=100"/>
+            <var label="Light color" type="LIGHT" context="Sun" component="COLOR" mode="COLOR"/>
+        </window>
+    </interface>
+</project>

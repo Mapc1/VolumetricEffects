@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<materialLib name="RayMarching">
+    <renderTargets>
+        <renderTarget name="gBuffer">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="normal" internalFormat="RGBA"/>
+                <color name="position" internalFormat="RGBA32F"/>
+                <color name="albedo" internalFormat="RGBA"/>
+                <color name="skyboxFlag" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+        
+        <renderTarget name="scatTrans">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="scattering" internalFormat="RGBA16F"/>
+                <color name="transmittance" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+
+        <renderTarget name="step1BlurScatTrans">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="step1BlurScattering" internalFormat="RGBA16F"/>
+                <color name="step1BlurTransmittance" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+
+        <renderTarget name="finalBlurScatTrans">
+            <SIZE width="1280" height="720"/>
+            <CLEAR_VALUES r="0.0" g="0.0" b="0.0" a="0.0"/>
+            <colors>
+                <color name="finalBlurScattering" internalFormat="RGBA16F"/>
+                <color name="finalBlurTransmittance" internalFormat="RGBA"/>
+            </colors>
+        </renderTarget>
+    </renderTargets>
+
+    <textures>
+        <texture name="densityTex">
+            <WIDTH value="256"/>
+            <HEIGHT value="256"/>
+            <DEPTH value="256"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+        <cubeMap name="skyBox"
+                 filePosX="../../textures/skybox/px.png"
+                 fileNegX="../../textures/skybox/nx.png"
+                 filePosY="../../textures/skybox/ny.png"
+                 fileNegY="../../textures/skybox/py.png"
+                 filePosZ="../../textures/skybox/pz.png"
+                 fileNegZ="../../textures/skybox/nz.png"
+        />
+    </textures>
+
+    <shaders>
+        <shader name="genDensityNoise">
+            <cs>
+                <file name="../../common_shaders/genDensityNoise.comp"/>
+                <file name="../../common_shaders/perlinNoise3D.glsl"/>
+            </cs>
+        </shader>
+        <shader name="skybox_gBuffer"
+                  vs="shaders/skybox_gBuffer/skybox_gBuffer.vert"
+                  ps="shaders/skybox_gBuffer/skybox_gBuffer.frag"
+        />
+        <shader name="scatIntegration">
+            <vs>
+                <file name="shaders/scatIntegration/scatIntegration.vert"/>
+            </vs>
+            <ps>
+                <file name="shaders/scatIntegration/scatIntegration.frag"/>
+                <file name="../../common_shaders/mediaSampling.glsl"/>
+            </ps>
+        </shader>
+        <shader name="gaussianBlurHorizontal"
+                  vs="shaders/gaussianBlur/gaussianBlur.vert"
+                  ps="shaders/gaussianBlur/gaussianBlurHorizontal.frag"
+        />
+        <shader name="gaussianBlurVertical"
+                  vs="shaders/gaussianBlur/gaussianBlur.vert"
+                  ps="shaders/gaussianBlur/gaussianBlurVertical.frag"
+        />
+        <shader name="render"
+                  vs="shaders/render/render.vert"
+                  ps="shaders/render/render.frag"
+        />
+    </shaders>
+    <states>
+        <state name="shadow">
+            <CULL_TYPE value="FRONT"/>
+        </state>
+    </states>
+
+    <materials>
+        <material name="genDensityNoise">
+            <shader name="genDensityNoise">
+                <values>
+                    <!-- Output texture -->
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <imageTextures>
+                <imageTexture UNIT="0" texture="densityTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures> 
+        </material>
+        
+        <material name="skybox_gBuffer">
+            <shader name="skybox_gBuffer">
+                <values>
+                    <!-- Settings props -->
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+
+                    <valueof uniform   = "CUBEMAP"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+
+                    <!-- Camera props -->
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
+                    />
+
+                    <!-- Renderer props -->
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="skyBox"/>
+            </textures>
+        </material>
+
+        <material name="scatIntegration">
+            <shader name="scatIntegration">
+                <values>
+                    <!-- Settings props -->
+                    <valueof uniform   = "NUM_STEPS"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "NUM_STEPS"
+                    />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
+
+                    <!-- GBuffer -->
+                    <valueof uniform   = "POSITION"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+
+                    <!-- Media props -->
+                    <valueof uniform   = "ANISOTROPY"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "ANISOTROPY"
+                    />
+                    <valueof uniform   = "SCATTERING"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "SCATTERING"
+                    />
+                    <valueof uniform   = "ABSORPTION"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "ABSORPTION"
+                    />
+                    <valueof uniform   = "DENSITY"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "DENSITY"
+                    />
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "12"
+                    />
+
+                    <!-- Directional light props -->
+                    <valueof uniform   = "DIRECT_LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_INTENSITY"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "LIGHT_INTENSITY"
+                    />
+
+                    <!-- Camera props -->
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+					<valueof uniform   = "V"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+							 component = "VIEW_MATRIX"
+                    />
+
+                    <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "AMBIENT_LIGHT_STRENGTH"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="position" UNIT="0"/>
+                <texture name="densityTex" UNIT="12">
+                    <WRAP_S value="MIRRORED_REPEAT"/>
+                    <WRAP_R value="MIRRORED_REPEAT"/>
+                    <WRAP_T value="MIRRORED_REPEAT"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+        </material>
+
+        <material name="gaussianBlurHorizontal">
+            <shader name="gaussianBlurHorizontal">
+                <values>
+                    <valueof uniform   = "SCATTERING"
+                             type      = "TEXTURE_BINDING"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="scattering">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture UNIT="1" name="transmittance">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+        </material>
+
+        <material name="gaussianBlurVertical">
+            <shader name="gaussianBlurVertical">
+                <values>
+                    <valueof uniform   = "SCATTERING"
+                             type      = "TEXTURE_BINDING"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="step1BlurScattering">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture UNIT="1" name="step1BlurTransmittance">
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+        </material>
+
+        <material name="render">
+            <shader name="render">
+                <values>
+                    <!-- GBuffer -->
+                    <valueof uniform   = "POSITION"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "0"
+                    />
+                    <valueof uniform   = "ALBEDO"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "2"
+                    />
+
+                    <!-- Integrated scattering and transmittance -->
+                    <valueof uniform   = "SCATTERING"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "5"
+                    />
+                    <valueof uniform   = "TRANSMITTANCE"
+                             type      = "TEXTURE_BINDING"
+                             component = "UNIT"
+                             id        = "6"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="position"   UNIT="0"/>
+                <texture name="albedo"     UNIT="2"/>
+                <texture name="finalBlurScattering" UNIT="5"/>
+                <texture name="finalBlurTransmittance" UNIT="6"/>
+            </textures>
+        </material>
+    </materials>
+</materialLib>

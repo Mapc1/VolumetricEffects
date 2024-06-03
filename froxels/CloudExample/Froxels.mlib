@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<materialLib name="Froxels">
+    <textures>
+        <texture name="densityTex">
+            <WIDTH value="256"/>
+            <HEIGHT value="256"/>
+            <DEPTH value="256"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+
+        <texture name="scatteringTex">
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+        
+        <texture name="historyTex">
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+
+        <texture name="integrationTex">
+            <WIDTH value="160"/>
+            <HEIGHT value="90"/>
+            <DEPTH value="64"/>
+            <INTERNAL_FORMAT value="RGBA16F"/>
+            <MIPMAP value="true"/>
+        </texture>
+
+        <cubeMap name="skyBox"
+                 filePosX="../../textures/skybox/px.png"
+                 fileNegX="../../textures/skybox/nx.png"
+                 filePosY="../../textures/skybox/ny.png"
+                 fileNegY="../../textures/skybox/py.png"
+                 filePosZ="../../textures/skybox/pz.png"
+                 fileNegZ="../../textures/skybox/nz.png"
+        />
+    </textures>
+
+    <shaders>
+        <shader name="genDensityNoise">
+            <cs>
+                <file name="../../common_shaders/genDensityNoise.comp"/>
+                <file name="shaders/utils/perlinNoise3D.glsl"/>
+            </cs>
+        </shader>
+        <shader name="calcScattering">
+            <cs>
+                <file name="shaders/compute/calcScattering.comp"/>
+                <file name="../../common_shaders/mediaSampling.glsl"/>
+                <file name="shaders/utils/common.glsl"/>
+            </cs>
+        </shader>
+        <shader name="scatIntegration">
+            <cs>
+                <file name="shaders/compute/scatIntegration.comp"/>
+            </cs>
+        </shader>
+        <shader name="skyBox">
+            <vs>
+                <file name="shaders/render/skyBox/skyBox.vert"/>
+            </vs>
+            <ps>
+                <file name="shaders/render/skyBox/skyBox.frag"/>
+                <file name="shaders/utils/common.glsl"/>
+            </ps>
+        </shader>
+    </shaders>
+
+    <states>
+        <state name="skyBox" >
+            <CULL_TYPE value="FRONT" />
+            <DEPTH_MASK value="false" />
+        </state>
+    </states>
+
+    <materials>
+        <material name="genDensityNoise">
+            <shader name="genDensityNoise">
+                <values>
+                    <!-- Output texture -->
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                </values>
+            </shader>
+            <imageTextures>
+                <imageTexture UNIT="0" texture="densityTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures> 
+        </material>
+        
+        <material name="calcScattering">
+            <shader name="calcScattering">
+                <values>
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
+                    <valueof uniform   = "AMBIENT_LIGHT_STRENGTH"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "AMBIENT_LIGHT_STRENGTH"
+                    />
+
+                    <!-- Input textures -->
+                    <valueof uniform   = "HISTORY_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "11"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "DENSITY_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "12"
+                             component = "UNIT"
+                    />
+
+                    <!-- Output texture -->
+                    <valueof uniform   = "SCATTERING_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                    
+                    <!-- Fog props -->
+                    <valueof uniform   = "ANISOTROPY"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "ANISOTROPY"
+                    />
+                    <valueof uniform   = "SCATTERING"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "SCATTERING"
+                    />
+                    <valueof uniform   = "ABSORPTION"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "ABSORPTION"
+                    />
+                    <valueof uniform   = "DENSITY"
+                             type      = "STATE"
+                             context   = "CURRENT"
+                             component = "DENSITY"
+                    />
+
+                    <valueof uniform   = "FRAME_COUNT"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "FRAME_COUNT"
+                    />
+
+                    <!-- Camera props -->
+                    <valueof uniform   = "INV_VIEW_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "VIEW_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "PREV_PROJ_VIEW_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "PREV_PROJ_VIEW_MAT"
+                    />
+                    <valueof uniform   = "INV_PROJ_MAT"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "PROJECTION_INVERSE_MATRIX"
+                    />
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+
+                    <!-- Directional light props -->
+                    <valueof uniform   = "DIRECT_LIGHT_INTENSITY"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "LIGHT_INTENSITY"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_DIR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "DIRECTION"
+                    />
+                    <valueof uniform   = "DIRECT_LIGHT_COLOR"
+                             type      = "LIGHT"
+                             context   = "Sun"
+                             component = "COLOR"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture name="historyTex" UNIT="11">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+                <texture name="densityTex" UNIT="12">
+                    <WRAP_S value="MIRRORED_REPEAT"/>
+                    <WRAP_R value="MIRRORED_REPEAT"/>
+                    <WRAP_T value="MIRRORED_REPEAT"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+            <imageTextures>
+                <imageTexture UNIT="1" texture="scatteringTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures> 
+        </material>
+
+        <material name="scatIntegration">
+            <shader name="scatIntegration">
+                <values>
+                    <valueof uniform   = "SCATTERING_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "INTEGRATION_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "HISTORY_UNIT"
+                             type      = "IMAGE_TEXTURE"
+                             context   = "CURRENT"
+                             id        = "2"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="scatteringTex">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+            <imageTextures>
+                <imageTexture UNIT="1" texture="integrationTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+                <imageTexture UNIT="2" texture="historyTex">
+                    <ACCESS value="WRITE_ONLY"/>
+                    <LEVEL value="0"/>
+                </imageTexture>
+            </imageTextures>
+        </material>
+        
+        <material name="skyBox">
+            <shader name="skyBox">
+                <values>
+                    <valueof uniform   = "CUBEMAP"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "0"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "INTEGRATION_UNIT"
+                             type      = "TEXTURE_BINDING"
+                             context   = "CURRENT"
+                             id        = "1"
+                             component = "UNIT"
+                    />
+                    <valueof uniform   = "PVM"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION_VIEW_MODEL"
+                    />
+                    <valueof uniform   = "M"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "MODEL"
+                    />
+                    <valueof uniform   = "V"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VIEW"
+                    />
+                    <valueof uniform   = "P"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "PROJECTION"
+                    />
+                    <valueof uniform   = "CAM_POS"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "POSITION"
+                    />
+                    <valueof uniform   = "NEAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "NEAR"
+                    />
+                    <valueof uniform   = "FAR"
+                             type      = "CAMERA"
+                             context   = "MainCamera"
+                             component = "FAR"
+                    />
+                    <valueof uniform   = "VOL_ACTIVE"
+                             type      = "RENDERER"
+                             context   = "CURRENT"
+                             component = "VOL_ACTIVE"
+                    />
+                </values>
+            </shader>
+            <textures>
+                <texture UNIT="0" name="skyBox"/>
+                <texture UNIT="1" name="integrationTex">
+                    <WRAP_S value="CLAMP_TO_EDGE"/>
+                    <WRAP_R value="CLAMP_TO_EDGE"/>
+                    <WRAP_T value="CLAMP_TO_EDGE"/>
+                    <MIN_FILTER value="LINEAR"/>
+                    <MAG_FILTER value="LINEAR"/>
+                </texture>
+            </textures>
+            <state name="skyBox"/>
+        </material>
+    </materials>
+</materialLib>

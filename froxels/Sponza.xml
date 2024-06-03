@@ -9,7 +9,6 @@
             <attribute type="STATE" name="HOMOGENEOUS_MEDIA" data="INT" value="0"/>
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
             <attribute type="LIGHT" name="AMBIENT_LIGHT_STRENGTH" data="FLOAT" value="0.0"/>
-            <attribute type="LIGHT" name="POINT_LIGHT_MAX_RANGE" data="FLOAT" value="600.0"/>
             <attribute type="RENDERER" name="VOL_ACTIVE" data="INT" value="0"/>
             <attribute type="CAMERA" name="PREV_PROJ_VIEW_MAT" data="MAT4"/>
         </attributes>
@@ -64,42 +63,72 @@
             <light name="PointLight1">
                 <COLOR r="0.6" g="0.1" b="0.1"/>
                 <POSITION x="0.0" y="500.0" z="0.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight2">
                 <COLOR r="0.2" g="0.4" b="0.55"/>
                 <POSITION x="250.0" y="550.0" z="250.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight3">
                 <COLOR r="0.2" g="0.4" b="0.55"/>
                 <POSITION x="0.0" y="500.0" z="-500.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight4">
                 <COLOR r="0.2" g="0.7" b="0.3"/>
                 <POSITION x="-1000.0" y="300.0" z="100.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight5">
-                <COLOR r="0.775" g="0.247" b="0.728"/>
+                <COLOR r="0.3" g="0.4" b="0.2"/>
                 <POSITION x="-600.0" y="100.0" z="-300.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight6">
                 <COLOR r="0.7" g="0.5" b="0.5"/>
                 <POSITION x="400.0" y="150.0" z="-100.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight7">
                 <COLOR r="0.2" g="0.8" b="0.8"/>
                 <POSITION x="0.0" y="100.0" z="0.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight8">
                 <COLOR r="0.7" g="0.7" b="0.2"/>
                 <POSITION x="300.0" y="200.0" z="-400.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight9">
                 <COLOR r="0.5" g="0.2" b="0.55"/>
                 <POSITION x="270" y="250" z="350.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
             <light name="PointLight10">
                 <COLOR r="0.5" g="0.8" b="0.55"/>
                 <POSITION x="-1000.0" y="560.0" z="-100.0"/>
+                <CONSTANT_ATT value="1"/>
+                <LINEAR_ATT value="0.022"/>
+                <QUADRATIC_ATT value="0.0019"/>
             </light>
         </lights>
 
@@ -274,9 +303,17 @@
                                 <TYPE value="SHADER_STORAGE"/>
                                 <BINDING_POINT value="3"/>
                             </buffer>
-                            <buffer name="maxRanges" fromLibrary="Froxels">
+                            <buffer name="constAtt" fromLibrary="Froxels">
                                 <TYPE value="SHADER_STORAGE"/>
                                 <BINDING_POINT value="4"/>
+                            </buffer>
+                            <buffer name="linearAtt" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="5"/>
+                            </buffer>
+                            <buffer name="quadAtt" fromLibrary="Froxels">
+                                <TYPE value="SHADER_STORAGE"/>
+                                <BINDING_POINT value="6"/>
                             </buffer>
                             <buffer name="enableds" fromLibrary="Froxels">
                                 <TYPE value="SHADER_STORAGE"/>
@@ -389,70 +426,90 @@
             <var label="Light position" type="LIGHT" context="PointLight1" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight1" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight1" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight1" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight1" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight1" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight1" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight1" component="ENABLED"/>
         </window>
         <window label="Point light 2 properties">
             <var label="Light position" type="LIGHT" context="PointLight2" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight2" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight2" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight2" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight2" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight2" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight2" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight2" component="ENABLED"/>
         </window>
         <window label="Point light 3 properties">
             <var label="Light position" type="LIGHT" context="PointLight3" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight3" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight3" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight3" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight3" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight3" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight3" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight3" component="ENABLED"/>
         </window>
         <window label="Point light 4 properties">
             <var label="Light position" type="LIGHT" context="PointLight4" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight4" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight4" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight4" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight4" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight4" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight4" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight4" component="ENABLED"/>
         </window>
         <window label="Point light 5 properties">
             <var label="Light position" type="LIGHT" context="PointLight5" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight5" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight5" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight5" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight5" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight5" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight5" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight5" component="ENABLED"/>
         </window>
         <window label="Point light 6 properties">
             <var label="Light position" type="LIGHT" context="PointLight6" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight6" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight6" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight6" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight6" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight6" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight6" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight6" component="ENABLED"/>
         </window>
         <window label="Point light 7 properties">
             <var label="Light position" type="LIGHT" context="PointLight7" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight7" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight7" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight7" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight7" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight7" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight7" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight7" component="ENABLED"/>
         </window>
         <window label="Point light 8 properties">
             <var label="Light position" type="LIGHT" context="PointLight8" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight8" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight8" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight8" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight8" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight8" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight8" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight8" component="ENABLED"/>
         </window>
         <window label="Point light 9 properties">
             <var label="Light position" type="LIGHT" context="PointLight9" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight9" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight9" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight9" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight9" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight9" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight9" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight9" component="ENABLED"/>
         </window>
         <window label="Point light 10 properties">
             <var label="Light position" type="LIGHT" context="PointLight10" component="POSITION" def="min=-1000 max=1000"/>
             <var label="Light intensity" type="LIGHT" context="PointLight10" component="LIGHT_INTENSITY" def="min=0 max=100"/>
             <var label="Light color" type="LIGHT" context="PointLight10" component="COLOR" mode="COLOR"/>
-            <var label="Light max range" type="LIGHT" context="PointLight10" component="POINT_LIGHT_MAX_RANGE" def="min=0.0 max=3000.0"/>
+            <var label="Light constant attenuation" type="LIGHT" context="PointLight10" component="CONSTANT_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light linear attenuation" type="LIGHT" context="PointLight10" component="LINEAR_ATT" def="min=0.0 max=1.0"/>
+            <var label="Light quadratic attenuation" type="LIGHT" context="PointLight10" component="QUADRATIC_ATT" def="min=0.0 max=1.0"/>
             <var label="Enabled" type="LIGHT" context="PointLight10" component="ENABLED"/>
         </window>
         

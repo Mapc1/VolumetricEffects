@@ -74,9 +74,15 @@ layout(std430, binding = 3) buffer Buff3 {
     float intensities[NUM_LIGHTS];
 };
 layout(std430, binding = 4) buffer Buff4 {
-    float maxRanges[NUM_LIGHTS];
+    float constAtt[NUM_LIGHTS];
 };
 layout(std430, binding = 5) buffer Buff5 {
+    float linearAtt[NUM_LIGHTS];
+};
+layout(std430, binding = 6) buffer Buff6 {
+    float quadAtt[NUM_LIGHTS];
+};
+layout(std430, binding = 7) buffer Buff7 {
     bool enableds[NUM_LIGHTS];
 };
 
@@ -167,7 +173,7 @@ float sampleCorrectShadowMap(int lightID, vec3 rayDir){
     }
 }
 
-vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange, int lightID) {
+vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float constAtt, float linearAtt, float quadAtt, int lightID) {
     vec3 fragLightDir = (worldPos - lightPos).xyz;
     float currentDepth = length(fragLightDir);
 
@@ -176,7 +182,7 @@ vec2 pointLightLuminance(vec4 worldPos, vec4 lightPos, float maxRange, int light
 
     float bias = 0.05;
     float shadow = currentDepth - bias <= closestDepth ? 1.0 : 0.0;
-    float attenuation = max(0.0, (pow(maxRange, (maxRange-currentDepth)/maxRange)) / maxRange);
+    float attenuation = 1.0 / (constAtt + linearAtt * currentDepth + quadAtt * (currentDepth*currentDepth));
 
     return vec2(shadow * (1-AMBIENT_LIGHT_STRENGTH), AMBIENT_LIGHT_STRENGTH) * attenuation;
 }
@@ -272,23 +278,25 @@ void main() {
 
         if (density > 0.00001) {
             if (DIRECT_LIGHT_ENABLED) {
-                vec2 luminances = directLightLuminance(worldPos) * getDirectLightVolumetricTransmittance(worldPos, MIN, MAX, windOffset);// * directLightLuminance(worldPos);
+                vec2 luminances = directLightLuminance(worldPos) * getDirectLightVolumetricTransmittance(worldPos, MIN, MAX, windOffset);
                 float phase = henyeyGreenstein(worldPos, CAM_POS, DIRECT_LIGHT_DIR, ANISOTROPY);
 
                 lScat += calcScattering(scattering, isotropicPhase, luminances.y, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
                 lScat += calcScattering(scattering, phase, luminances.x, DIRECT_LIGHT_COLOR, DIRECT_LIGHT_INTENSITY);  
             }
 
-            for (int j = 0; j < NUM_LIGHTS; j++) {
-                vec4 lightPos = positions[j];
-                vec4 lightColor = colors[j];
-                float lightIntensity = intensities[j];
-                float maxRange = maxRanges[j];
-                bool enabled = enableds[j];
+            for (int i = 0; i < NUM_LIGHTS; i++) {
+                vec4 lightPos = positions[i];
+                vec4 lightColor = colors[i];
+                float lightIntensity = intensities[i];
+                float constAtt = constAtt[i];
+                float linearAtt = linearAtt[i];
+                float quadAtt = quadAtt[i];
+                bool enabled = enableds[i];
 
                 if (enabled) {
                     vec4 worldLightDir = worldPos - lightPos;
-                    vec2 luminances = pointLightLuminance(worldPos, lightPos, maxRange, j) * getPointLightVolumetricTransmittance(worldPos, lightPos, MIN, MAX, windOffset);
+                    vec2 luminances = pointLightLuminance(worldPos, lightPos, constAtt, linearAtt, quadAtt, i) * getPointLightVolumetricTransmittance(worldPos, lightPos, MIN, MAX, windOffset);
                     float phase = henyeyGreenstein(worldPos, CAM_POS, worldLightDir, ANISOTROPY);
 
                     lScat += calcScattering(scattering, isotropicPhase, luminances.y, lightColor, lightIntensity);

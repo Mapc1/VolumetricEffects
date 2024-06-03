@@ -46,9 +46,15 @@ layout(std430, binding = 3) buffer Buff3 {
     float intensities[NUM_LIGHTS];
 };
 layout(std430, binding = 4) buffer Buff4 {
-    float maxRanges[NUM_LIGHTS];
+    float constAtt[NUM_LIGHTS];
 };
 layout(std430, binding = 5) buffer Buff5 {
+    float linearAtt[NUM_LIGHTS];
+};
+layout(std430, binding = 6) buffer Buff6 {
+    float quadAtt[NUM_LIGHTS];
+};
+layout(std430, binding = 7) buffer Buff7 {
     bool enableds[NUM_LIGHTS];
 };
 
@@ -115,7 +121,7 @@ float sampleCorrectShadowMap(int lightID, vec3 rayDir){
     }
 }
 
-float pointLightLuminance(vec3 normal, vec4 worldPos, vec4 lightPos, float maxRange, int lightID) {
+float pointLightLuminance(vec3 normal, vec4 worldPos, vec4 lightPos, float constAtt, float linearAtt, float quadAtt, int lightID) {
     vec3 frag_light_dir = (worldPos - lightPos).xyz;
     vec4 view_frag_light_dir = V * vec4(frag_light_dir,0.0);
     float n_dot_l = max(0.0, -dot(normalize(normal), normalize(view_frag_light_dir.xyz)));
@@ -129,7 +135,7 @@ float pointLightLuminance(vec3 normal, vec4 worldPos, vec4 lightPos, float maxRa
     float shadow = current_depth - bias <= closest_depth ? 1.0 : 0.0;
     float luminance = n_dot_l * shadow * (1-AMBIENT_LIGHT_STRENGTH) + AMBIENT_LIGHT_STRENGTH;
 
-    float attenuation = max(0.0, (pow(maxRange, (maxRange-current_depth)/maxRange))/maxRange);
+    float attenuation = 1.0 / (constAtt + linearAtt * current_depth + quadAtt * (current_depth*current_depth));
 
     return luminance * attenuation;
 }
@@ -152,12 +158,14 @@ void main() {
     for (int i = 0; i < NUM_LIGHTS; i++) {
         vec4 lightPos = positions[i];
         vec4 lightColor = colors[i];
-        float maxRange = maxRanges[i];
+        float constAtt = constAtt[i];
+        float linearAtt = linearAtt[i];
+        float quadAtt = quadAtt[i];
         float lightIntensity = intensities[i];
         bool enabled = enableds[i];
 
         if (enabled) {
-            float luminance = pointLightLuminance(normal, DataIn.worldPos, lightPos, maxRange, i);
+            float luminance = pointLightLuminance(normal, DataIn.worldPos, lightPos, constAtt, linearAtt, quadAtt, i);
             color += albedo * lightColor * luminance;
         }
     }

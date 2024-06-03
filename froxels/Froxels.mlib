@@ -19,7 +19,19 @@
                 <field value="FLOAT"/>
             </structure>
         </buffer>
-        <buffer name="maxRanges">
+        <buffer name="constAtt">
+            <DIM x="10" y="1" z="1"/>
+            <structure>
+                <field value="FLOAT"/>
+            </structure>
+        </buffer>
+        <buffer name="linearAtt">
+            <DIM x="10" y="1" z="1"/>
+            <structure>
+                <field value="FLOAT"/>
+            </structure>
+        </buffer>
+        <buffer name="quadAtt">
             <DIM x="10" y="1" z="1"/>
             <structure>
                 <field value="FLOAT"/>
@@ -881,13 +893,21 @@
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="3"/>
                 </buffer>
-                <buffer name="maxRanges">
+                <buffer name="constAtt">
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="4"/>
                 </buffer>
-                <buffer name="enableds">
+                <buffer name="linearAtt">
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="5"/>
+                </buffer>
+                <buffer name="quadAtt">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="6"/>
+                </buffer>
+                <buffer name="enableds">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="7"/>
                 </buffer>
             </buffers>
         </material>
@@ -1368,13 +1388,21 @@
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="3"/>
                 </buffer>
-                <buffer name="maxRanges">
+                <buffer name="constAtt">
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="4"/>
                 </buffer>
-                <buffer name="enableds">
+                <buffer name="linearAtt">
                     <TYPE value="SHADER_STORAGE"/>
                     <BINDING_POINT value="5"/>
+                </buffer>
+                <buffer name="quadAtt">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="6"/>
+                </buffer>
+                <buffer name="enableds">
+                    <TYPE value="SHADER_STORAGE"/>
+                    <BINDING_POINT value="7"/>
                 </buffer>
             </buffers>
         </material>

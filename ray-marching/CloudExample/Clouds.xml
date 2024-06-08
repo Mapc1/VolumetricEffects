@@ -2,12 +2,12 @@
 <project name="Volumetric Effects - Ray-marching" width="1280" height="720">
     <assets>
         <attributes>
-            <attribute type="STATE" name="NUM_STEPS" data="INT" value="64"/>
+            <attribute type="STATE" name="NUM_STEPS" data="INT" value="256"/>
 
-            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.7"/>
+            <attribute type="STATE" name="ANISOTROPY" data="FLOAT" value="0.8"/>
             <attribute type="STATE" name="SCATTERING" data="VEC4" x="0.9" y="0.9" z="0.9" w="1.0"/>
             <attribute type="STATE" name="ABSORPTION" data="FLOAT" value="0.1"/>
-            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.001"/>
+            <attribute type="STATE" name="DENSITY" data="FLOAT" value="0.006"/>
 
             <attribute type="LIGHT" name="LIGHT_INTENSITY" data="FLOAT" value="50"/>
 
@@ -32,9 +32,9 @@
         <cameras>
             <camera name="MainCamera">
                 <viewport name="MainViewport"/>
-                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="1000.0"/>
-                <POSITION x="0" y="0" z="0"/>
-                <LOOK_AT_POINT x="1" y="0" z="0"/>
+                <projection TYPE="PERSPECTIVE" FOV="60.0" NEAR="1.0" FAR="2000.0"/>
+                <POSITION x="-315.745" y="-101.192" z="171.314"/>
+                <LOOK_AT_POINT x="-316.659" y="-101.144" z="170.912"/>
                 <UP x="0.0" y="1.0" z="0.0"/>
             </camera>
         </cameras>

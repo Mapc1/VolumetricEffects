@@ -130,7 +130,7 @@ float calcDepth(int stepNum, float gBufferDepth, float jit) {
     //return NEAR * pow(gBufferDepth/NEAR, (float(stepNum)+jit) / float(NUM_STEPS));
 
     // Linear depth
-    return ((gBufferDepth-NEAR)/NUM_STEPS) * (float(stepNum) + jit);
+    return ((FAR-NEAR)/(NUM_STEPS+jit)) * (float(stepNum)+jit);
 }
 
 float screenCoordToJitter(vec2 screenCoord) {
@@ -169,7 +169,7 @@ void main() {
     float jit = screenCoordToJitter(gl_FragCoord.xy);
     vec4 cur_world_pos = CAM_POS + vec4(ray_dir*calcDepth(cur_step, linear_depth, jit), 0.0);
     vec3 wind_offset = FRAME_COUNT * WIND * WIND_SPEED;
-    while (cur_depth < linear_depth) {
+    while (cur_depth < FAR){//cur_depth < linear_depth) {
         float density = sampleMedia(cur_world_pos, false, MIN, MAX, wind_offset, DENSITY_UNIT) * DENSITY;
         float stride = calcDepth(cur_step, linear_depth, jit) - cur_depth;
         if (density > 0.00001) {

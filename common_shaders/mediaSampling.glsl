@@ -44,7 +44,7 @@ float sampleMedia(vec4 worldPos, bool isHomogeneousMedia, vec4 minPos, vec4 maxP
     if(isHomogeneousMedia) 
         return 1.0;
 
-    if (worldPos.y > maxPos.y || worldPos.y < minPos.y)
+    if (worldPos.y < minPos.y || worldPos.y > maxPos.y)
         return 0.0;
 
     vec3 uvw = worldPosToUVW(worldPos, minPos, maxPos, windOffset);

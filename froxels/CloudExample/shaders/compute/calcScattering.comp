@@ -42,8 +42,8 @@ const int NUM_LIGHTS = 10;
 
 // For density texture
 const vec3 DENSITY_TEX_DIMS = vec3(256,256,256);
-//const vec4 MIN = vec4(-3000,-3000,-3000,1.0);
-//const vec4 MAX = vec4(3000,3000,3000,1.0);
+//const vec4 MIN = vec4(-500,-500,-500,1.0);
+//const vec4 MAX = vec4(500,500,500,1.0);
 const vec4 MIN = vec4(-700,-700,-700,1.0);
 const vec4 MAX = vec4(700,700,700,1.0);
 

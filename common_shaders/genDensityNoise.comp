@@ -5,7 +5,7 @@ layout (local_size_x=8, local_size_y=8, local_size_z=1) in;
 // Programable parameters
 uniform int OCTAVES = 10;
 uniform float STARTING_AMPLITUDE = 1.0;
-uniform float STARTING_FREQ = 3;
+uniform float STARTING_FREQ = 2;
 uniform float GAIN = 0.5;
 uniform float LACUNARITY = 2;
 
@@ -28,11 +28,11 @@ vec3 id_to_uvw(ivec3 id) {
 
 void main() {
     ivec3 storeLoc = ivec3(gl_GlobalInvocationID);
-    vec3 worldPos = id_to_uvw(storeLoc);
+    vec3 worldPos = id_to_uvw(storeLoc)*vec3(0.5,0.7,0.5);
 
     float noise = octaveNoise(worldPos, OCTAVES, STARTING_AMPLITUDE, STARTING_FREQ, GAIN, LACUNARITY) * 0.5 + 0.5;
 
-    if (noise < 0.58) 
+    if (noise < 0.6) 
         noise = 0;
 
     imageStore(DENSITY_UNIT, storeLoc, vec4(noise,noise,noise,1.0));

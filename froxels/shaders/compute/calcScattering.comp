@@ -53,7 +53,7 @@ uniform float AMBIENT_LIGHT_STRENGTH;
 uniform int VOL_ACTIVE;
 uniform int HOMOGENEOUS_MEDIA;
 
-const int NUM_LIGHTS = 10;
+const int NUM_LIGHTS = 1;
 
 // For density texture
 const vec3 DENSITY_TEX_DIMS = vec3(256,256,256);
